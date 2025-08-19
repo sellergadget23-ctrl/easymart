@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brightgrid Wiring Co</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+try { emailjs.init("YOUR_USER_ID"); } catch(e){ console.warn("EmailJS init failed:", e); }
+
+
+
+
+</script>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">
+      <img src="logo.png" alt="Brightgrid Wiring Co" loading="lazy">
+      <h1>Brightgrid Wiring Co</h1>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#shop" data-key="navShop">Shop</a></li>
+        <li><a href="#cart" data-key="navCart">Cart</a></li>
+        <li><a href="#checkout" data-key="navCheckout">Checkout</a></li>
+      </ul>
+    </nav>
+    <div class="controls">
+      <label for="language">Language:</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="th">Thai</option>
+        <option value="ph">Filipino</option>
+      </select>
+      <label for="currency">Currency:</label>
+      <select id="currency">
+        <option value="USD">USD</option>
+        <option value="THB">THB</option>
+        <option value="PHP">PHP</option>
+      </select>
+      <div class="cart-count">🛒 <span id="cartCount">0</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Shop -->
+  <section id="shop">
+    <div class="filters">
+      <label>Category: 
+        <select id="categoryFilter">
+          <option value="all">All</option>
+        </select>
+      </label>
+    </div>
+    <div id="productGrid"></div>
+<label>Rating (1–5):</label>
+<input type="number" id="product-rating" min="1" max="5">
+  </section>
+
+  <!-- Cart -->
+  <section id="cart">
+    <h2 data-key="cartHeading">Your Cart</h2>
+    <table id="cartTable">
+      <thead>
+        <tr>
+          <th data-key="product">Product</th>
+          <th data-key="qty">Qty</th>
+          <th data-key="price">Price</th>
+          <th data-key="total">Total</th>
+          <th data-key="remove">Remove</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <h3 id="cartTotal">Total: $0</h3>
+  </section>
+
+  <!-- Checkout -->
+  <section id="checkout">
+    <form id="checkoutForm" class="hidden">
+      <h3 data-key="checkoutHeading">Checkout</h3>
+      <input type="text" id="name" placeholder="Your Name" required>
+      <input type="email" id="email" placeholder="Your Email" required>
+      <input type="tel" id="phone" placeholder="Phone Number" required>
+      <input type="text" id="address" placeholder="Delivery Address" required>
+      <label>Payment Method:</label>
+      <select id="paymentMethod">
+        <option value="Bank Transfer">Bank Transfer</option>
+        <option value="Partial Payment">Partial Payment</option>
+      </select>
+      <button type="submit" data-key="placeOrder">Place Order</button>
+    </form>
+  </section>
+
+  <!-- Site Reviews -->
+  <section id="siteReviews">
+    <h3 data-key="reviewsHeading">Customer Reviews</h3>
+    <div id="siteAvgStars"></div>
+    <div id="siteAvgText"></div>
+    <div id="siteReviewsList"></div>
+    <form id="siteReviewForm">
+      <label>Rating:
+        <select name="rating" required>
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★☆</option>
+          <option value="3">★★★☆☆</option>
+          <option value="2">★★☆☆☆</option>
+          <option value="1">★☆☆☆☆</option>
+        </select>
+      </label>
+      <input type="text" name="name" placeholder="Your name" required>
+      <textarea name="comment" placeholder="Write your comment (optional)"></textarea>
+      <button type="submit" data-key="submitReview">Submit Review</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <p>&copy; 2025 Brightgrid Wiring Co</p>
+</footer>
+
+
+<script>
+  // ------------------------------
+  // Utilities
+  // ------------------------------
+  function safeParse(json,fallback){ try{return JSON.parse(json)||fallback;}catch(e){return fallback;} }
+  function getJSON(key,fallback){ return safeParse(localStorage.getItem(key),fallback); }
+  function setJSON(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
+
+  // ------------------------------
+  // Language & Currency
+  // ------------------------------
+  const translations={
+    en:{ navShop:"Shop", navCart:"Cart", navCheckout:"Checkout",
+      cartHeading:"Your Cart", checkoutHeading:"Checkout", placeOrder:"Place Order",
+      reviewsHeading:"Customer Reviews", submitReview:"Submit Review", noReviews:"No reviews yet.",
+      name:"Your Name", email:"Your Email", phone:"Phone Number", address:"Delivery Address",
+      paymentMethod:"Payment Method", bankTransfer:"Bank Transfer", partialPayment:"Partial Payment",
+      rating:"Rating", all:"All", total:"Total", average:"Average", comment:"Write your comment (optional)"
+    },
+    th:{ navShop:"ร้านค้า", navCart:"ตะกร้า", navCheckout:"เช็คเอาท์",
+      cartHeading:"ตะกร้าของคุณ", checkoutHeading:"ชำระเงิน", placeOrder:"สั่งซื้อ",
+      reviewsHeading:"ความคิดเห็นจากลูกค้า", submitReview:"ส่งรีวิว", noReviews:"ยังไม่มีรีวิว",
+      name:"ชื่อของคุณ", email:"อีเมลของคุณ", phone:"เบอร์โทร", address:"ที่อยู่จัดส่ง",
+      paymentMethod:"วิธีการชำระเงิน", bankTransfer:"โอนผ่านธนาคาร", partialPayment:"ชำระบางส่วน",
+      rating:"คะแนน", all:"ทั้งหมด", total:"ราคารวม", average:"เฉลี่ย", comment:"เขียนความคิดเห็นของคุณ (ไม่จำเป็น)"
+    },
+    ph:{ navShop:"Tindahan", navCart:"Cart", navCheckout:"Checkout",
+      cartHeading:"Ang Iyong Cart", checkoutHeading:"Checkout", placeOrder:"Ilagay ang Order",
+      reviewsHeading:"Mga review mula sa mga customer", submitReview:"Isumite ang Review", noReviews:"Walang review pa.",
+      name:"Pangalan mo", email:"Email mo", phone:"Telepono", address:"Address sa Pag-deliver",
+      paymentMethod:"Paraan ng Pagbabayad", bankTransfer:"Bank Transfer", partialPayment:"Partial Payment",
+      rating:"Rating", all:"Lahat", total:"Kabuuan", average:"Karaniwan", comment:"Isulat ang komento mo (opsyonal)"
+    }
+  };
+
+  let currentLanguage = localStorage.getItem("language") || "en";
+  let currentCurrency = localStorage.getItem("currency") || "USD";
+  function t(key){ return translations[currentLanguage][key] || translations.en[key] || key; }
+
+  function setLanguage(lang){
+    currentLanguage = lang;
+    localStorage.setItem("language", lang);
+    document.querySelectorAll("[data-key]").forEach(el => el.textContent = t(el.dataset.key));
+    populateCategories();
+    updateCartPlaceholders();
+    updateReviewPlaceholders();
+    updatePrices();
+    renderSiteReviews();
+  }
+
+  // ------------------------------
+  // Firebase Initialization
+  // ------------------------------
+  const firebaseConfig = {
+    apiKey: "AIzaSyBaHYwRvQpEn9LsY7-uV51hVn-ixHzQP4",
+    authDomain: "shopplus-e-commerce.firebaseapp.com",
+    projectId: "shopplus-e-commerce",
+    storageBucket: "shopplus-e-commerce.appspot.com",
+    messagingSenderId: "1028340895006",
+    appId: "1:1028340895006:web:3218487a7bc23eb0db8d0f",
+    measurementId: "G-GZEZ7X2HYR"
+  };
+  if(typeof firebase==="undefined"){ console.error("Firebase SDK not loaded."); }
+  else { firebase.initializeApp(firebaseConfig); }
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  // ------------------------------
+  // Admin Detection
+  // ------------------------------
+  let adminMode = false;
+  auth.onAuthStateChanged(user=>{
+    adminMode = user?.uid==="U1DBTrFLE4UzMeFfIIvtzz3Sokp1" || false;
+    fetchProducts(); // refresh product grid after auth check
+  });
+
+  // ------------------------------
+  // Fetch products from Firestore
+  // ------------------------------
+  let products = [];
+  async function fetchProducts(){
+    try{
+      const snapshot = await db.collection("products").get();
+      products = snapshot.docs.map(doc => ({id:doc.id, ...doc.data()}));
+      populateCategories();
+      renderProducts(document.getElementById("categoryFilter")?.value || "all", adminMode);
+    }catch(err){ console.error("Failed to fetch products:",err); }
+  }
+
+  function populateCategories(){
+    const catSel=document.getElementById("categoryFilter");
+    if(!catSel) return;
+    const categories=["all", ...new Set(products.map(p=>p.category))];
+    catSel.innerHTML=categories.map(c=>`<option value="${c}">${t(c)||c}</option>`).join("");
+  }
+
+
+
+
+
+
+ function getStars(rating){
+  const fullStars = Math.floor(rating);
+  const halfStar = rating - fullStars >= 0.5 ? 1 : 0;
+  const emptyStars = 5 - fullStars - halfStar;
+
+  return "★".repeat(fullStars) + (halfStar ? "⯪" : "") + "☆".repeat(emptyStars);
+}
+
+async function renderProducts(category="all", admin=false){
+  const grid = document.getElementById("productGrid");
+  if(!grid) return;
+  grid.innerHTML="";
+  const filtered = category==="all"? products : products.filter(p=>p.category===category);
+
+  for(const p of filtered){
+    const div = document.createElement("div");
+    div.className="product";
+
+    // Fetch reviews
+    let avgRating = p.rating || 0;
+    try {
+      const snapshot = await db.collection("products").doc(p.id).collection("reviews").get();
+      if(!snapshot.empty){
+        const reviews = snapshot.docs.map(d=>d.data());
+        avgRating = reviews.reduce((sum,r)=>sum+r.rating,0)/reviews.length;
+        avgRating += Math.random()*0.3;
+        if(avgRating>5) avgRating = 5;
+      }
+    } catch(err){ console.error(err); }
+
+    const stars = getStars(avgRating);
+
+    div.innerHTML=`
+      <img src="${p.imageUrl||p.image}" alt="${p.name}" loading="lazy">
+      <h3>${p.name}</h3>
+      <p class="price" data-usd="${p.price}">${p.price.toLocaleString("en",{style:"currency",currency:"USD"})}</p>
+      <p class="rating" style="color:gold;">${stars}</p>
+      <button onclick="addToCart('${p.id}','${p.name}',${p.price})">${t('placeOrder')}</button>
+      ${admin? `<button onclick="editProductPrompt('${p.id}')">Edit</button>
+               <button onclick="deleteProduct('${p.id}')">Delete</button>` : ''}
+      <div id="reviews-${p.id}" class="productReviews"></div>
+    `;
+    grid.appendChild(div);
+    renderProductReviews(p.id, admin);
+  }
+
+  updatePrices();
+}
+
+
+  // ------------------------------
+  // Cart Functions
+  // ------------------------------
+  function getCart(){ return getJSON("cartItems",[]); }
+  function setCart(cart){ setJSON("cartItems",cart); }
+
+  function addToCart(id,name,price){
+    let cart=getCart();
+    const exist=cart.find(i=>i.id===id);
+    if(exist) exist.quantity++; else cart.push({id,name,price,quantity:1});
+    setCart(cart); updateCart(); alert(`${name} added to cart!`);
+  }
+
+  function updateCart(){
+    const tbody=document.querySelector("#cartTable tbody");
+    if(!tbody) return;
+    tbody.innerHTML="";
+    let cart=getCart();
+    cart.forEach(i=>{
+      const tr=document.createElement("tr");
+      const itemTotal=i.price*i.quantity;
+      tr.innerHTML=`<td>${i.name}</td><td>${i.quantity}</td><td data-usd="${i.price}"></td><td data-usd="${itemTotal}"></td><td><button onclick="removeFromCart('${i.id}')">X</button></td>`;
+      tbody.appendChild(tr);
+    });
+    const countEl=document.getElementById("cartCount");
+    if(countEl) countEl.textContent=cart.reduce((s,i)=>s+i.quantity,0);
+    updatePrices();
+  }
+
+  function removeFromCart(id){ setCart(getCart().filter(i=>i.id!==id)); updateCart(); }
+
+  // ------------------------------
+  // Prices
+  // ------------------------------
+  const rates = { USD:1, THB:36, PHP:55 }; // update as needed
+  function updatePrices(){
+    document.querySelectorAll("[data-usd]").forEach(el=>{
+      const usd=parseFloat(el.dataset.usd);
+      const cur=rates[currentCurrency]? currentCurrency:"USD";
+      el.textContent=(usd*rates[cur]).toLocaleString("en",{style:"currency",currency:cur});
+    });
+    const totalEl=document.getElementById("cartTotal");
+    if(totalEl){
+      const cur=rates[currentCurrency]? currentCurrency:"USD";
+      const total=getCart().reduce((s,i)=>s+i.price*i.quantity,0)*rates[cur];
+      totalEl.textContent=`${t('total')}: ${total.toLocaleString("en",{style:"currency",currency:cur})}`;
+    }
+  }
+
+  // ------------------------------
+  // Admin Product Functions
+  // ------------------------------
+  async function addProduct(name, price, imageUrl, category, rating=0){
+    try{
+      const docRef = await db.collection("products").add({name,price,imageUrl,category,rating});
+      products.push({id:docRef.id,name,price,imageUrl,category,rating});
+      populateCategories(); renderProducts('all', adminMode);
+      alert("Product added!");
+    }catch(err){ console.error(err); alert("Failed to add product"); }
+  }
+
+  async function editProduct(id, updatedData){
+    try{
+      await db.collection("products").doc(id).update(updatedData);
+      const idx=products.findIndex(p=>p.id===id);
+      products[idx]={...products[idx],...updatedData};
+      renderProducts('all', adminMode);
+    }catch(err){ console.error(err); alert("Failed to edit product"); }
+  }
+
+  async function deleteProduct(id){
+    if(!confirm("Delete this product?")) return;
+    try{
+      await db.collection("products").doc(id).delete();
+      products=products.filter(p=>p.id!==id);
+      renderProducts('all', adminMode);
+    }catch(err){ console.error(err); alert("Failed to delete"); }
+  }
+
+  function editProductPrompt(id){
+    const p=products.find(x=>x.id===id);
+    const name=prompt("Name:",p.name);
+    const price=parseFloat(prompt("Price:",p.price));
+    const imageUrl=prompt("Image URL:",p.imageUrl||p.image);
+    const category=prompt("Category:",p.category);
+    const rating=parseInt(prompt("Rating (0-5):",p.rating||0));
+    if(name && !isNaN(price) && imageUrl && category && !isNaN(rating)){
+      editProduct(id,{name,price,imageUrl,category,rating});
+    }
+  }
+
+  // ------------------------------
+// Product Reviews
+// ------------------------------
+async function renderProductReviews(productId, admin=false){
+  try{
+    const container = document.getElementById(`reviews-${productId}`);
+    if(!container) return;
+    container.innerHTML = "";
+
+    const snapshot = await db.collection("products").doc(productId)
+                             .collection("reviews").orderBy("createdAt","desc").get();
+    const reviews = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+
+    if(reviews.length > 0){
+      // Calculate average rating
+      const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
+      // Display average rating in gold
+      const avgDiv = document.createElement("div");
+      avgDiv.innerHTML = `<strong>${t('average')}:</strong> <span style="color:gold;">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5 - Math.round(avg))}</span>`;
+      container.appendChild(avgDiv);
+
+      // Render each review
+      reviews.forEach(r => {
+        const div = document.createElement("div");
+        div.className = "reviewItem";
+        div.innerHTML = `<strong>${r.name}</strong> <span style="color:gold;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                         <p>${r.comment || ""}</p>`;
+        if(admin){
+          const editBtn = document.createElement("button"); 
+          editBtn.textContent = "Edit";
+          editBtn.onclick = () => editReviewPrompt(productId, r.id, r);
+          
+          const delBtn = document.createElement("button"); 
+          delBtn.textContent = "Delete";
+          delBtn.onclick = () => deleteReview(productId, r.id);
+
+          div.appendChild(editBtn);
+          div.appendChild(delBtn);
+        }
+        container.appendChild(div);
+      });
+    }
+    // If no reviews, container remains empty (no "No reviews yet")
+  } catch(err){
+    console.error(err);
+  }
+}
+
+  // ------------------------------
+  // Site-wide Reviews (localStorage)
+  // ------------------------------
+  let siteReviews=getJSON("siteReviews",[]);
+  function updateReviewPlaceholders(){
+    const f=document.getElementById("siteReviewForm");
+    if(!f) return;
+    const name=f.querySelector('input[name="name"]');
+    const comment=f.querySelector('textarea[name="comment"]');
+    if(name) name.placeholder=t('name');
+    if(comment) comment.placeholder=t('comment');
+  }
+
+  function renderSiteReviews(){
+    const list=document.getElementById("siteReviewsList");
+    const avgStars=document.getElementById("siteAvgStars");
+    const avgText=document.getElementById("siteAvgText");
+    if(!list) return;
+    list.innerHTML="";
+    if(siteReviews.length===0){ list.innerHTML=`<p>${t('noReviews')}</p>`; if(avgStars) avgStars.textContent=""; if(avgText) avgText.textContent=""; return; }
+    const avg=siteReviews.reduce((s,r)=>s+parseInt(r.rating),0)/siteReviews.length;
+    if(avgStars) avgStars.textContent='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));
+    if(avgText) avgText.textContent=`${t('average')}: ${avg.toFixed(1)}`;
+    siteReviews.forEach(r=>{
+      const div=document.createElement("div");
+      div.innerHTML=`<strong>${r.name}</strong> ${'★'.repeat(r.rating)}<p>${r.comment||""}</p>`;
+      list.appendChild(div);
+    });
+  }
+
+  // ------------------------------
+  // Checkout Placeholders
+  // ------------------------------
+  function updateCartPlaceholders(){
+    const name=document.getElementById("name");
+    const email=document.getElementById("email");
+    const phone=document.getElementById("phone");
+    const address=document.getElementById("address");
+    const pay=document.getElementById("paymentMethod");
+    if(name) name.placeholder=t('name');
+    if(email) email.placeholder=t('email');
+    if(phone) phone.placeholder=t('phone');
+    if(address) address.placeholder=t('address');
+    if(pay && pay.options.length>=2){ pay.options[0].text=t('bankTransfer'); pay.options[1].text=t('partialPayment'); }
+  }
+
+  // ------------------------------
+  // Initialize
+  // ------------------------------
+  document.addEventListener("DOMContentLoaded",()=>{
+    const langSel=document.getElementById("language");
+    const curSel=document.getElementById("currency");
+    if(langSel) langSel.value=currentLanguage;
+    if(curSel) curSel.value=currentCurrency;
+    if(langSel) langSel.addEventListener("change",e=>setLanguage(e.target.value));
+    if(curSel) curSel.addEventListener("change",e=>{ currentCurrency=e.target.value; localStorage.setItem("currency",currentCurrency); updatePrices(); });
+
+    const checkoutForm=document.getElementById("checkoutForm");
+    if(checkoutForm){
+      checkoutForm.addEventListener("submit",async e=>{
+        e.preventDefault();
+        const cart=getCart();
+        if(cart.length===0){ alert("Cart empty"); return; }
+        const orderSummary=cart.map(i=>`${i.name} x${i.quantity}`).join("\n");
+        try{ await emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{order_summary:orderSummary}); alert("Order placed!"); }
+        catch(err){ console.warn(err); alert("Order saved locally"); }
+        localStorage.removeItem("cartItems"); updateCart(); e.target.reset();
+      });
+    }
+
+    const reviewForm=document.getElementById("siteReviewForm");
+    if(reviewForm){
+      reviewForm.addEventListener("submit",e=>{
+        e.preventDefault();
+        const f=e.target;
+        siteReviews.push({name:f.name.value,rating:parseInt(f.rating.value),comment:f.comment.value});
+        setJSON("siteReviews",siteReviews);
+        f.reset(); renderSiteReviews();
+      });
+    }
+
+    updateCart();
+    updateCartPlaceholders();
+    updateReviewPlaceholders();
+    renderSiteReviews();
+    setLanguage(currentLanguage);
+  });
+</script>
+</body>
+</html>
