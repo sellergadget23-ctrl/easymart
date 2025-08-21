@@ -207,16 +207,19 @@ try { emailjs.init("YOUR_USER_ID"); } catch(e){ console.warn("EmailJS init faile
   // ------------------------------
   // Fetch products from Firestore
   // ------------------------------
-  let products = [];
-  async function fetchProducts(){
-    try{
-      const snapshot = await db.collection("products").get();
-      products = snapshot.docs.map(doc => ({id:doc.id, ...doc.data()}));
+ let products = [];
+
+function fetchProducts() {
+  try {
+    db.collection("products").onSnapshot(snapshot => {
+      products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       populateCategories();
       renderProducts(document.getElementById("categoryFilter")?.value || "all", adminMode);
-    }catch(err){ console.error("Failed to fetch products:",err); }
+    });
+  } catch (err) {
+    console.error("Failed to fetch products:", err);
   }
-
+}
   function populateCategories(){
     const catSel=document.getElementById("categoryFilter");
     if(!catSel) return;
