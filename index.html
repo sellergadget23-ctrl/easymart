@@ -164,7 +164,7 @@ try { emailjs.init("YOUR_USER_ID"); } catch(e){ console.warn("EmailJS init faile
   };
 
   let currentLanguage = localStorage.getItem("language") || "en";
-  let currentCurrency = localStorage.getItem("currency") || "USD";
+  let currentCurrency = localStorage.getItem("currency") || "PHP";
   function t(key){ return translations[currentLanguage][key] || translations.en[key] || key; }
 
   function setLanguage(lang){
