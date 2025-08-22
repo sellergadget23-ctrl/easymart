@@ -270,6 +270,11 @@ async function renderProducts(category="all", admin=false){
     const div = document.createElement("div");
     div.className="product";
 
+
+
+
+    
+
     // Fetch reviews
     let avgRating = p.rating || 0;
     try {
@@ -438,8 +443,12 @@ async function renderProductReviews(productId, admin=false){
 
 
 // ==============================
-// CART FUNCTIONS
+// CART & CURRENCY FUNCTIONS
 // ==============================
+const rates = { USD: 1, THB: 36, PHP: 55 };
+let currentCurrency = localStorage.getItem("currency") || "PHP";
+let firstScrollDone = false;
+
 function getCart() {
   return JSON.parse(localStorage.getItem("cartItems") || "[]");
 }
@@ -448,19 +457,15 @@ function setCart(cart) {
   localStorage.setItem("cartItems", JSON.stringify(cart));
 }
 
-// Track first scroll to checkout
-let firstScrollDone = false;
-
-// Add to Cart
+// ------------------------------
+// ADD TO CART
+// ------------------------------
 function addToCart(id, name, price) {
-  let cart = getCart();
-  const exist = cart.find(item => item.id === id);
+  const cart = getCart();
+  const item = cart.find(i => i.id === id);
 
-  if (exist) {
-    exist.quantity++;
-  } else {
-    cart.push({ id, name, price, quantity: 1 });
-  }
+  if (item) item.quantity++;
+  else cart.push({ id, name, price, quantity: 1 });
 
   setCart(cart);
   updateCart();
@@ -476,58 +481,62 @@ function addToCart(id, name, price) {
   }
 }
 
-// Remove item from cart
+// ------------------------------
+// REMOVE FROM CART
+// ------------------------------
 function removeFromCart(id) {
   setCart(getCart().filter(item => item.id !== id));
   updateCart();
 }
 
-// Update Cart Table & Totals
+// ------------------------------
+// UPDATE CART TABLE & TOTALS
+// ------------------------------
 function updateCart() {
   const tbody = document.querySelector("#cartTable tbody");
-  if (!tbody) return;
+  if (tbody) {
+    tbody.innerHTML = "";
+    const cart = getCart();
 
-  tbody.innerHTML = "";
-  const cart = getCart();
+    cart.forEach(item => {
+      const itemTotal = item.price * item.quantity;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>
+          <button class="qty-btn" data-id="${item.id}" data-action="decrease">–</button>
+          <input type="number" min="1" value="${item.quantity}" class="cart-qty" data-id="${item.id}">
+          <button class="qty-btn" data-id="${item.id}" data-action="increase">+</button>
+        </td>
+        <td data-usd="${item.price}"></td>
+        <td data-usd="${itemTotal}"></td>
+        <td><button onclick="removeFromCart('${item.id}')">X</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
 
-  cart.forEach(item => {
-    const tr = document.createElement("tr");
-    const itemTotal = item.price * item.quantity;
+    const countEl = document.getElementById("cartCount");
+    if (countEl) countEl.textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
 
-    tr.innerHTML = `
-      <td>${item.name}</td>
-      <td>
-        <button class="qty-btn" data-id="${item.id}" data-action="decrease">–</button>
-        <input type="number" min="1" value="${item.quantity}" class="cart-qty" data-id="${item.id}">
-        <button class="qty-btn" data-id="${item.id}" data-action="increase">+</button>
-      </td>
-      <td data-usd="${item.price}"></td>
-      <td data-usd="${itemTotal}"></td>
-      <td><button onclick="removeFromCart('${item.id}')">X</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  const countEl = document.getElementById("cartCount");
-  if (countEl) countEl.textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
+    bindQuantityInputs();
+    bindQtyButtons();
+  }
 
   updatePrices();
-  bindQuantityInputs();
-  bindQtyButtons();
 
   const checkoutForm = document.getElementById("checkoutForm");
-  if (cart.length === 0 && checkoutForm) {
+  if (checkoutForm && getCart().length === 0) {
     checkoutForm.classList.add("hidden");
     firstScrollDone = false;
   }
 }
 
 // ------------------------------
-// Quantity Input Binding
+// QUANTITY INPUTS
 // ------------------------------
 function bindQuantityInputs() {
   document.querySelectorAll(".cart-qty").forEach(input => {
-    input.addEventListener("input", () => {
+    input.oninput = () => {
       const id = input.dataset.id;
       let qty = parseInt(input.value);
       if (isNaN(qty) || qty < 1) qty = 1;
@@ -538,16 +547,16 @@ function bindQuantityInputs() {
       if (item) item.quantity = qty;
       setCart(cart);
       updateCart();
-    });
+    };
   });
 }
 
 // ------------------------------
-// Increment/Decrement Buttons
+// INCREMENT/DECREMENT BUTTONS
 // ------------------------------
 function bindQtyButtons() {
   document.querySelectorAll(".qty-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.onclick = () => {
       const id = btn.dataset.id;
       const action = btn.dataset.action;
       const cart = getCart();
@@ -559,17 +568,13 @@ function bindQtyButtons() {
 
       setCart(cart);
       updateCart();
-    });
+    };
   });
 }
 
-  
-
-// PRICES & CURRENCY
-// ==============================
-const rates = { USD: 1, THB: 36, PHP: 55 };
-let currentCurrency = localStorage.getItem("currency") || "PHP";
-
+// ------------------------------
+// UPDATE PRICES
+// ------------------------------
 function updatePrices() {
   document.querySelectorAll("[data-usd]").forEach(el => {
     const usd = parseFloat(el.dataset.usd);
@@ -585,6 +590,9 @@ function updatePrices() {
   }
 }
 
+// ------------------------------
+// CHANGE CURRENCY
+// ------------------------------
 function setCurrency(cur) {
   if (!rates[cur]) return;
   currentCurrency = cur;
@@ -592,74 +600,83 @@ function setCurrency(cur) {
   updatePrices();
 }
 
-// ==============================
+// ------------------------------
 // CHECKOUT FORM
-// ==============================
-document.getElementById("checkoutForm").addEventListener("submit", function(e) {
-  e.preventDefault();
+// ------------------------------
+function initCheckoutForm() {
+  const checkoutForm = document.getElementById("checkoutForm");
+  if (!checkoutForm) return;
 
-  const cart = getCart();
-  if (cart.length === 0) {
-    alert("Cart is empty");
-    return;
-  }
+  checkoutForm.onsubmit = e => {
+    e.preventDefault();
+    const cart = getCart();
+    if (!cart.length) { alert("Cart is empty"); return; }
 
-  const cartItems = cart.map(item => `${item.name} (x${item.quantity}) - ${item.price}`);
+    const cartItems = cart.map(item => `${item.name} (x${item.quantity}) - ${item.price}`);
+    const templateParams = {
+      name: document.getElementById("name")?.value || "",
+      email: document.getElementById("email")?.value || "",
+      phone: document.getElementById("phone")?.value || "",
+      address: document.getElementById("address")?.value || "",
+      paymentMethod: document.getElementById("paymentMethod")?.value || "",
+      orderDetails: cartItems.join("\n"),
+      total: document.getElementById("cartTotal")?.innerText || ""
+    };
 
-  const templateParams = {
-    name: document.getElementById("name").value,
-    email: document.getElementById("email").value,
-    phone: document.getElementById("phone").value,
-    address: document.getElementById("address").value,
-    paymentMethod: document.getElementById("paymentMethod").value,
-    orderDetails: cartItems.join("\n"),
-    total: document.getElementById("cartTotal").innerText
+    emailjs.send("service_kh6j2jr", "template_Orcr14j", templateParams)
+      .then(() => {
+        checkoutForm.reset();
+        localStorage.removeItem("cartItems");
+        updateCart();
+
+        const successMsg = document.getElementById("successMessage");
+        if (successMsg) {
+          successMsg.classList.remove("hidden");
+          setTimeout(() => successMsg.classList.add("hidden"), 6000);
+        }
+      })
+      .catch(err => {
+        console.error("EmailJS Error:", err);
+        const errorMsg = document.getElementById("errorMessage");
+        if (errorMsg) {
+          errorMsg.classList.remove("hidden");
+          setTimeout(() => errorMsg.classList.add("hidden"), 6000);
+        }
+      });
   };
+}
 
-  emailjs.send("service_kh6j2jr", "template_Orcr14j", templateParams)
-    .then(() => {
-      document.getElementById("checkoutForm").reset();
-      localStorage.removeItem("cartItems");
-      updateCart();
-
-      const successMsg = document.getElementById("successMessage");
-      successMsg.classList.remove("hidden");
-      setTimeout(() => successMsg.classList.add("hidden"), 6000);
-    })
-    .catch(error => {
-      console.error("EmailJS Error:", error);
-      const errorMsg = document.getElementById("errorMessage");
-      errorMsg.classList.remove("hidden");
-      setTimeout(() => errorMsg.classList.add("hidden"), 6000);
-    });
-});
-
-// ==============================
-// AUTO-BINDING FOR BUTTONS & CURRENCY SELECTOR
-// ==============================
+// ------------------------------
+// INITIALIZATION
+// ------------------------------
 document.addEventListener("DOMContentLoaded", () => {
+  // Auto-bind add-to-cart buttons
   document.querySelectorAll("[data-add-to-cart]").forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.onclick = () => {
       const id = btn.dataset.id;
       const name = btn.dataset.name;
       const price = parseFloat(btn.dataset.price);
       addToCart(id, name, price);
-    });
+    };
   });
 
+  // Currency selector
   const curSel = document.getElementById("currency");
   if (curSel) {
     curSel.value = currentCurrency;
-    curSel.addEventListener("change", e => setCurrency(e.target.value));
+    curSel.onchange = e => setCurrency(e.target.value);
   }
 
+  // Init checkout form
+  initCheckoutForm();
+
+  // Update cart & prices initially
   updateCart();
   updatePrices();
 
+  // Hide checkout form if empty
   const checkoutForm = document.getElementById("checkoutForm");
-  if (getCart().length === 0 && checkoutForm) {
-    checkoutForm.classList.add("hidden");
-  }
+  if (checkoutForm && !getCart().length) checkoutForm.classList.add("hidden");
 });
 
   
