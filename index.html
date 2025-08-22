@@ -18,41 +18,47 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <!-- Header -->
-  <header>
-    <div class="header-top">
-      <div class="logo">
-        <img src="logo.png" alt="Brightgrid Wiring Co" loading="lazy">
-        <h1>Brightgrid Wiring Co</h1>
-      </div>
-      <nav>
-        <ul>
-          <li><a href="#shop" data-key="navShop">Shop</a></li>
-          <li><a href="#cart" data-key="navCart">Cart</a></li>
-          <li><a href="#checkout" data-key="navCheckout">Checkout</a></li>
-        </ul>
-      </nav>
-      <div class="controls">
-        <label for="language">Language:</label>
-        <select id="language">
-          <option value="en">English</option>
-          <option value="th">Thai</option>
-          <option value="ph">Filipino</option>
-        </select>
-
-        <label for="currency">Currency:</label>
-        <select id="currency">
-          <option value="USD">USD</option>
-          <option value="THB">THB</option>
-          <option value="PHP" selected>PHP</option>
-        </select>
-
-        <div class="cart-count">🛒 <span id="cartCount">0</span></div>
-      </div>
+<header>
+  <div class="header-top">
+    <div class="logo">
+      <img src="logo.png" alt="Brightgrid Wiring Co" loading="lazy">
+      <h1>Brightgrid Wiring Co</h1>
     </div>
-  </header>
+
+    <!-- Mobile menu toggle -->
+    <input type="checkbox" id="navToggle" class="nav-toggle">
+    <label for="navToggle" class="nav-toggle-label">
+      <span></span>
+    </label>
+
+    <nav>
+      <ul>
+        <li><a href="#shop" data-key="navShop">Shop</a></li>
+        <li><a href="#cart" data-key="navCart">Cart</a></li>
+        <li><a href="#checkout" data-key="navCheckout">Checkout</a></li>
+      </ul>
+    </nav>
+
+    <div class="controls">
+      <label for="language">Language:</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="th">Thai</option>
+        <option value="ph">Filipino</option>
+      </select>
+
+      <label for="currency">Currency:</label>
+      <select id="currency">
+        <option value="USD">USD</option>
+        <option value="THB">THB</option>
+        <option value="PHP" selected>PHP</option>
+      </select>
+
+      <div class="cart-count">🛒 <span id="cartCount">0</span></div>
+    </div>
+  </div>
+</header>
+          
 
   <!-- Main Content -->
   <main>
