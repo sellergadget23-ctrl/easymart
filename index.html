@@ -477,7 +477,7 @@ async function renderProductReviews(productId, admin=false){
 
   // Init EmailJS (replace with your Public Key)
   (function() {
-    emailjs.init("YOUR_PUBLIC_KEY");
+    emailjs.init("1MH2OPgPAqXqD8FiV");
   })();
 
   document.getElementById("checkoutForm").addEventListener("submit", function(e) {
@@ -504,7 +504,7 @@ async function renderProductReviews(productId, admin=false){
     };
 
     // Send with EmailJS
-    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
+    emailjs.send("service_kh6j2jr", "template_Orcr14j", templateParams)
       .then(() => {
         // ✅ Success
         document.getElementById("checkoutForm").reset();
@@ -525,7 +525,7 @@ async function renderProductReviews(productId, admin=false){
         errorMsg.classList.remove("hidden");
         setTimeout(() => errorMsg.classList.add("hidden"), 6000);
       });
-  });
+  
 
 
   
