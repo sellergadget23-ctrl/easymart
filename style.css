@@ -205,21 +205,128 @@ nav a:hover{background:rgba(255,255,255,0.06)}
   .cart-sticky .checkout-btn{background:var(--primary);color:white;padding:10px 14px;border-radius:10px;border:none;font-weight:800}
 }
 
-/* ===== Checkout & Review forms ===== */
-#checkoutForm, #siteReviewForm{
-  background:var(--surface);padding:12px;border-radius:12px;box-shadow:var(--shadow-sm);max-width:720px;margin:16px 0;
+/* ==============================
+   Checkout & Review Forms
+   ============================== */
+#checkoutForm, 
+#siteReviewForm {
+  background: var(--surface, #fafafa);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm, 0 2px 6px rgba(0,0,0,0.08));
+  max-width: 720px;
+  margin: 16px auto;
+  font-family: Arial, sans-serif;
 }
-#checkoutForm input,#checkoutForm select,#checkoutForm button,
-#siteReviewForm input,#siteReviewForm textarea,#siteReviewForm select,#siteReviewForm button{
-  width:100%;padding:10px;border-radius:10px;border:1px solid #e9eef6;margin-top:8px;font-size:14px;
-}
-#siteReviewForm textarea{min-height:90px;resize:vertical}
-#checkoutForm .small{display:flex;gap:8px}
-#checkoutForm .small > *{flex:1}
 
-/* form buttons */
-#checkoutForm button,#siteReviewForm button{background:var(--primary);color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;font-weight:700}
-#checkoutForm button:hover,#siteReviewForm button:hover{background:var(--primary-600)}
+#checkoutForm h3 {
+  margin-bottom: 12px;
+  color: #333;
+}
+
+/* Inputs & selects */
+#checkoutForm input,
+#checkoutForm select,
+#checkoutForm button,
+#siteReviewForm input,
+#siteReviewForm textarea,
+#siteReviewForm select,
+#siteReviewForm button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e9eef6;
+  margin-top: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+#siteReviewForm textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+#checkoutForm .small {
+  display: flex;
+  gap: 8px;
+}
+#checkoutForm .small > * {
+  flex: 1;
+}
+
+/* ==============================
+   Buttons
+   ============================== */
+#checkoutForm button,
+#siteReviewForm button {
+  background: var(--primary, #458500);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+/* Hover */
+#checkoutForm button:hover,
+#siteReviewForm button:hover {
+  background: var(--primary-600, #356700);
+}
+
+/* Active (clicked) */
+#checkoutForm button:active,
+#siteReviewForm button:active {
+  background: var(--primary-700, #274d00);
+  transform: scale(0.97);
+}
+
+/* Loading state */
+#checkoutForm button.loading {
+  background: #888 !important;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==============================
+   Success & Error Toast Messages
+   ============================== */
+#successMessage,
+#errorMessage {
+  max-width: 500px;
+  margin: 16px auto;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  display: none;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Visible state */
+#successMessage.show,
+#errorMessage.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Success */
+#successMessage {
+  background: #e6ffe6;
+  border: 1px solid #6cc070;
+  color: #2f6627;
+}
+
+/* Error */
+#errorMessage {
+  background: #ffe6e6;
+  border: 1px solid #e06666;
+  color: #a94442;
+}
 
 /* ===== Site-wide reviews list ===== */
 #siteReviews{margin:18px 0}
