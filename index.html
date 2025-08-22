@@ -198,36 +198,42 @@
     renderSiteReviews();
   }
 
-  // ------------------------------
-  // Firebase Initialization
-  // ------------------------------
-  const firebaseConfig = {
-    apiKey: "AIzaSyBaHYwRvQpEn9LsY7-uV51hVn-ixHzQP4",
-    authDomain: "shopplus-e-commerce.firebaseapp.com",
-    projectId: "shopplus-e-commerce",
-    storageBucket: "shopplus-e-commerce.appspot.com",
-    messagingSenderId: "1028340895006",
-    appId: "1:1028340895006:web:3218487a7bc23eb0db8d0f",
-    measurementId: "G-GZEZ7X2HYR"
-  };
-  if(typeof firebase==="undefined"){ console.error("Firebase SDK not loaded."); }
-  else { firebase.initializeApp(firebaseConfig); }
-  const db = firebase.firestore();
-  const auth = firebase.auth();
+ // ------------------------------
+// Firebase Initialization
+// ------------------------------
+const firebaseConfig = {
+  apiKey: "AIzaSyBaHYwRvQpEn9LsY7-uV51hVn-ixHzQP4",
+  authDomain: "shopplus-e-commerce.firebaseapp.com",
+  projectId: "shopplus-e-commerce",
+  storageBucket: "shopplus-e-commerce.appspot.com",
+  messagingSenderId: "1028340895006",
+  appId: "1:1028340895006:web:3218487a7bc23eb0db8d0f",
+  measurementId: "G-GZEZ7X2HYR"
+};
 
-  // ------------------------------
-  // Admin Detection
-  // ------------------------------
-  let adminMode = false;
-  auth.onAuthStateChanged(user=>{
-    adminMode = user?.uid==="U1DBTrFLE4UzMeFfIIvtzz3Sokp1" || false;
-    fetchProducts(); // refresh product grid after auth check
-  });
+if (typeof firebase === "undefined") {
+  console.error("Firebase SDK not loaded.");
+} else {
+  firebase.initializeApp(firebaseConfig);
+}
 
-  // ------------------------------
-  // Fetch products from Firestore
-  // ------------------------------
- let products = [];
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// ------------------------------
+// Admin Detection
+// ------------------------------
+let adminMode = false;
+
+auth.onAuthStateChanged(user => {
+  adminMode = user?.uid === "U1DBTrFLE4UzMeFfIIvtzz3Sokp1" || false;
+  fetchProducts(); // refresh product grid after auth check
+});
+
+// ------------------------------
+// Fetch products from Firestore
+// ------------------------------
+let products = [];
 
 function fetchProducts() {
   try {
@@ -240,19 +246,15 @@ function fetchProducts() {
     console.error("Failed to fetch products:", err);
   }
 }
-  function populateCategories(){
-    const catSel=document.getElementById("categoryFilter");
-    if(!catSel) return;
-    const categories=["all", ...new Set(products.map(p=>p.category))];
-    catSel.innerHTML=categories.map(c=>`<option value="${c}">${t(c)||c}</option>`).join("");
-  }
 
+function populateCategories() {
+  const catSel = document.getElementById("categoryFilter");
+  if (!catSel) return;
+  const categories = ["all", ...new Set(products.map(p => p.category))];
+  catSel.innerHTML = categories.map(c => <option value="${c}">${t(c) || c}</option>).join("");
+}
 
-
-
-
-
- function getStars(rating){
+function getStars(rating) {
   const fullStars = Math.floor(rating);
   const halfStar = rating - fullStars >= 0.5 ? 1 : 0;
   const emptyStars = 5 - fullStars - halfStar;
@@ -260,16 +262,16 @@ function fetchProducts() {
   return "★".repeat(fullStars) + (halfStar ? "⯪" : "") + "☆".repeat(emptyStars);
 }
 
-async function renderProducts(category="all", admin=false){
+async function renderProducts(category = "all", admin = false) {
   const grid = document.getElementById("productGrid");
-  if(!grid) return;
-  grid.innerHTML="";
-  const filtered = category==="all"? products : products.filter(p=>p.category===category);
+  if (!grid) return;
+  grid.innerHTML = "";
 
-  for(const p of filtered){
+  const filtered = category === "all" ? products : products.filter(p => p.category === category);
+
+  for (const p of filtered) {
     const div = document.createElement("div");
-    div.className="product";
-
+    div.className = "product";
 
 
 
