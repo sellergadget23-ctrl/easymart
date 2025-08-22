@@ -147,60 +147,62 @@
   <p>&copy; 2025 Brightgrid Wiring Co</p>
 </footer>
 
-
 <script>
-  // ------------------------------
-  // Utilities
-  // ------------------------------
-  function safeParse(json,fallback){ try{return JSON.parse(json)||fallback;}catch(e){return fallback;} }
-  function getJSON(key,fallback){ return safeParse(localStorage.getItem(key),fallback); }
-  function setJSON(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
+/* ==============================
+   Utilities
+============================== */
+function safeParse(json, fallback){ try { return JSON.parse(json) || fallback; } catch(e){ return fallback; } }
+function getJSON(key, fallback){ return safeParse(localStorage.getItem(key), fallback); }
+function setJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
-  // ------------------------------
-  // Language & Currency
-  // ------------------------------
-  const translations={
-    en:{ navShop:"Shop", navCart:"Cart", navCheckout:"Checkout",
-      cartHeading:"Your Cart", checkoutHeading:"Checkout", placeOrder:"Place Order",
-      reviewsHeading:"Customer Reviews", submitReview:"Submit Review", noReviews:"No reviews yet.",
-      name:"Your Name", email:"Your Email", phone:"Phone Number", address:"Delivery Address",
-      paymentMethod:"Payment Method", bankTransfer:"Bank Transfer", partialPayment:"Partial Payment",
-      rating:"Rating", all:"All", total:"Total", average:"Average", comment:"Write your comment (optional)"
-    },
-    th:{ navShop:"ร้านค้า", navCart:"ตะกร้า", navCheckout:"เช็คเอาท์",
-      cartHeading:"ตะกร้าของคุณ", checkoutHeading:"ชำระเงิน", placeOrder:"สั่งซื้อ",
-      reviewsHeading:"ความคิดเห็นจากลูกค้า", submitReview:"ส่งรีวิว", noReviews:"ยังไม่มีรีวิว",
-      name:"ชื่อของคุณ", email:"อีเมลของคุณ", phone:"เบอร์โทร", address:"ที่อยู่จัดส่ง",
-      paymentMethod:"วิธีการชำระเงิน", bankTransfer:"โอนผ่านธนาคาร", partialPayment:"ชำระบางส่วน",
-      rating:"คะแนน", all:"ทั้งหมด", total:"ราคารวม", average:"เฉลี่ย", comment:"เขียนความคิดเห็นของคุณ (ไม่จำเป็น)"
-    },
-    ph:{ navShop:"Tindahan", navCart:"Cart", navCheckout:"Checkout",
-      cartHeading:"Ang Iyong Cart", checkoutHeading:"Checkout", placeOrder:"Ilagay ang Order",
-      reviewsHeading:"Mga review mula sa mga customer", submitReview:"Isumite ang Review", noReviews:"Walang review pa.",
-      name:"Pangalan mo", email:"Email mo", phone:"Telepono", address:"Address sa Pag-deliver",
-      paymentMethod:"Paraan ng Pagbabayad", bankTransfer:"Bank Transfer", partialPayment:"Partial Payment",
-      rating:"Rating", all:"Lahat", total:"Kabuuan", average:"Karaniwan", comment:"Isulat ang komento mo (opsyonal)"
-    }
-  };
-
-  let currentLanguage = localStorage.getItem("language") || "en";
-  let currentCurrency = localStorage.getItem("currency") || "PHP";
-  function t(key){ return translations[currentLanguage][key] || translations.en[key] || key; }
-
-  function setLanguage(lang){
-    currentLanguage = lang;
-    localStorage.setItem("language", lang);
-    document.querySelectorAll("[data-key]").forEach(el => el.textContent = t(el.dataset.key));
-    populateCategories();
-    updateCartPlaceholders();
-    updateReviewPlaceholders();
-    updatePrices();
-    renderSiteReviews();
+/* ==============================
+   Language & Currency
+============================== */
+const translations = {
+  en:{ navShop:"Shop", navCart:"Cart", navCheckout:"Checkout",
+    cartHeading:"Your Cart", checkoutHeading:"Checkout", placeOrder:"Place Order",
+    reviewsHeading:"Customer Reviews", submitReview:"Submit Review", noReviews:"No reviews yet.",
+    name:"Your Name", email:"Your Email", phone:"Phone Number", address:"Delivery Address",
+    paymentMethod:"Payment Method", bankTransfer:"Bank Transfer", partialPayment:"Partial Payment",
+    rating:"Rating", all:"All", total:"Total", average:"Average", comment:"Write your comment (optional)"
+  },
+  th:{ navShop:"ร้านค้า", navCart:"ตะกร้า", navCheckout:"เช็คเอาท์",
+    cartHeading:"ตะกร้าของคุณ", checkoutHeading:"ชำระเงิน", placeOrder:"สั่งซื้อ",
+    reviewsHeading:"ความคิดเห็นจากลูกค้า", submitReview:"ส่งรีวิว", noReviews:"ยังไม่มีรีวิว",
+    name:"ชื่อของคุณ", email:"อีเมลของคุณ", phone:"เบอร์โทร", address:"ที่อยู่จัดส่ง",
+    paymentMethod:"วิธีการชำระเงิน", bankTransfer:"โอนผ่านธนาคาร", partialPayment:"ชำระบางส่วน",
+    rating:"คะแนน", all:"ทั้งหมด", total:"ราคารวม", average:"เฉลี่ย", comment:"เขียนความคิดเห็นของคุณ (ไม่จำเป็น)"
+  },
+  ph:{ navShop:"Tindahan", navCart:"Cart", navCheckout:"Checkout",
+    cartHeading:"Ang Iyong Cart", checkoutHeading:"Checkout", placeOrder:"Ilagay ang Order",
+    reviewsHeading:"Mga review mula sa mga customer", submitReview:"Isumite ang Review", noReviews:"Walang review pa.",
+    name:"Pangalan mo", email:"Email mo", phone:"Telepono", address:"Address sa Pag-deliver",
+    paymentMethod:"Paraan ng Pagbabayad", bankTransfer:"Bank Transfer", partialPayment:"Partial Payment",
+    rating:"Rating", all:"Lahat", total:"Kabuuan", average:"Karaniwan", comment:"Isulat ang komento mo (opsyonal)"
   }
+};
 
- // ------------------------------
-// Firebase Initialization
-// ------------------------------
+let currentLanguage = localStorage.getItem("language") || "en";
+let currentCurrency = localStorage.getItem("currency") || "PHP"; // default PHP
+
+function t(key){ return translations[currentLanguage][key] || translations.en[key] || key; }
+
+function setLanguage(lang){
+  currentLanguage = lang;
+  localStorage.setItem("language", lang);
+  // Translate all elements with data-key
+  document.querySelectorAll("[data-key]").forEach(el => el.textContent = t(el.dataset.key));
+  // Update dynamic UI bits
+  populateCategories();
+  updateCheckoutPlaceholders();
+  updateReviewPlaceholders();
+  updatePrices();
+  renderSiteReviews();
+}
+
+/* ==============================
+   Firebase Initialization
+============================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBaHYwRvQpEn9LsY7-uV51hVn-ixHzQP4",
   authDomain: "shopplus-e-commerce.firebaseapp.com",
@@ -213,294 +215,270 @@ const firebaseConfig = {
 
 if (typeof firebase === "undefined") {
   console.error("Firebase SDK not loaded.");
-} else {
+}
+else {
   firebase.initializeApp(firebaseConfig);
 }
+const db = typeof firebase !== "undefined" ? firebase.firestore() : null;
+const auth = typeof firebase !== "undefined" ? firebase.auth() : null;
 
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-// ------------------------------
-// Admin Detection
-// ------------------------------
+/* ==============================
+   Admin Detection
+============================== */
 let adminMode = false;
+if (auth) {
+  auth.onAuthStateChanged(user => {
+    adminMode = user?.uid === "U1DBTrFLE4UzMeFfIIvtzz3Sokp1" || false;
+    fetchProducts(); // refresh after auth
+  });
+}
 
-auth.onAuthStateChanged(user => {
-  adminMode = user?.uid === "U1DBTrFLE4UzMeFfIIvtzz3Sokp1" || false;
-  fetchProducts(); // refresh product grid after auth check
-});
-
-// ------------------------------
-// Fetch products from Firestore
-// ------------------------------
+/* ==============================
+   Products (Firestore)
+============================== */
 let products = [];
 
-function fetchProducts() {
-  try {
-    db.collection("products").onSnapshot(snapshot => {
+function fetchProducts(){
+  if(!db){ console.warn("No Firestore instance. Skipping fetchProducts."); return; }
+  try{
+    db.collection("products").onSnapshot(snapshot=>{
       products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       populateCategories();
-      renderProducts(document.getElementById("categoryFilter")?.value || "all", adminMode);
+      const selected = document.getElementById("categoryFilter")?.value || "all";
+      renderProducts(selected, adminMode);
     });
-  } catch (err) {
+  }catch(err){
     console.error("Failed to fetch products:", err);
   }
 }
 
-function populateCategories() {
+function populateCategories(){
   const catSel = document.getElementById("categoryFilter");
-  if (!catSel) return;
-  const categories = ["all", ...new Set(products.map(p => p.category))];
-  catSel.innerHTML = categories.map(c => <option value="${c}">${t(c) || c}</option>).join("");
+  if(!catSel) return;
+  const categories = ["all", ...new Set(products.map(p => p.category).filter(Boolean))];
+  catSel.innerHTML = categories.map(c => `<option value="${c}">${t(c) || c}</option>`).join("");
 }
 
-function getStars(rating) {
-  const fullStars = Math.floor(rating);
-  const halfStar = rating - fullStars >= 0.5 ? 1 : 0;
-  const emptyStars = 5 - fullStars - halfStar;
-
-  return "★".repeat(fullStars) + (halfStar ? "⯪" : "") + "☆".repeat(emptyStars);
+function getStars(rating){
+  const full = Math.floor(rating || 0);
+  const half = (rating - full) >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  return "★".repeat(full) + (half ? "⯪" : "") + "☆".repeat(empty);
 }
 
-async function renderProducts(category = "all", admin = false) {
+async function renderProducts(category="all", admin=false){
   const grid = document.getElementById("productGrid");
-  if (!grid) return;
+  if(!grid) return;
   grid.innerHTML = "";
-
   const filtered = category === "all" ? products : products.filter(p => p.category === category);
 
-  for (const p of filtered) {
-    const div = document.createElement("div");
-    div.className = "product";
+  for(const p of filtered){
+    const card = document.createElement("div");
+    card.className = "product";
 
-
-
-    
-
-    // Fetch reviews
+    // Compute average rating from subcollection (optional)
     let avgRating = p.rating || 0;
-    try {
-      const snapshot = await db.collection("products").doc(p.id).collection("reviews").get();
-      if(!snapshot.empty){
-        const reviews = snapshot.docs.map(d=>d.data());
-        avgRating = reviews.reduce((sum,r)=>sum+r.rating,0)/reviews.length;
-        avgRating += Math.random()*0.3;
-        if(avgRating>5) avgRating = 5;
+    try{
+      if(db){
+        const snapshot = await db.collection("products").doc(p.id).collection("reviews").get();
+        if(!snapshot.empty){
+          const reviews = snapshot.docs.map(d => d.data());
+          avgRating = reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length;
+          avgRating = Math.min(5, avgRating + Math.random()*0.3); // tiny random bias as in your code
+        }
       }
-    } catch(err){ console.error(err); }
+    }catch(e){ console.error(e); }
 
     const stars = getStars(avgRating);
 
-    div.innerHTML=`
-      <img src="${p.imageUrl||p.image}" alt="${p.name}" loading="lazy">
-      <h3>${p.name}</h3>
-      <p class="price" data-usd="${p.price}">${p.price.toLocaleString("en",{style:"currency",currency:"USD"})}</p>
+    card.innerHTML = `
+      <img src="${p.imageUrl || p.image || ""}" alt="${p.name || ""}" loading="lazy">
+      <h3>${p.name || ""}</h3>
+      <p class="price" data-usd="${p.price || 0}">${Number(p.price || 0).toLocaleString("en",{style:"currency",currency:"USD"})}</p>
       <p class="rating" style="color:gold;">${stars}</p>
-      <button onclick="addToCart('${p.id}','${p.name}',${p.price})">${t('placeOrder')}</button>
-      ${admin? `<button onclick="editProductPrompt('${p.id}')">Edit</button>
-               <button onclick="deleteProduct('${p.id}')">Delete</button>` : ''}
+      <button onclick="addToCart('${p.id}','${(p.name||"").replace(/'/g,"\\'")}',${p.price || 0})">${t('placeOrder')}</button>
+      ${admin ? `
+        <button onclick="editProductPrompt('${p.id}')">Edit</button>
+        <button onclick="deleteProduct('${p.id}')">Delete</button>
+      ` : ""}
       <div id="reviews-${p.id}" class="productReviews"></div>
     `;
-    grid.appendChild(div);
+    grid.appendChild(card);
+
+    // Render product reviews below each card
     renderProductReviews(p.id, admin);
   }
 
   updatePrices();
 }
 
+/* ==============================
+   Admin Product Functions
+============================== */
+async function addProduct(name, price, imageUrl, category, rating=0){
+  try{
+    await db.collection("products").add({ name, price, imageUrl, category, rating });
+    alert("Product added!");
+  }catch(err){ console.error(err); alert("Failed to add product"); }
+}
 
+async function editProduct(id, updatedData){
+  try{
+    await db.collection("products").doc(id).update(updatedData);
+    alert("Product updated!");
+  }catch(err){ console.error(err); alert("Failed to edit product"); }
+}
 
+async function deleteProduct(id){
+  if(!confirm("Delete this product?")) return;
+  try{
+    await db.collection("products").doc(id).delete();
+    alert("Deleted.");
+  }catch(err){ console.error(err); alert("Failed to delete"); }
+}
 
-
-
-
-
-
-  
- 
-
-  // ------------------------------
-  // Admin Product Functions
-  // ------------------------------
-  async function addProduct(name, price, imageUrl, category, rating=0){
-    try{
-      const docRef = await db.collection("products").add({name,price,imageUrl,category,rating});
-      products.push({id:docRef.id,name,price,imageUrl,category,rating});
-      populateCategories(); renderProducts('all', adminMode);
-      alert("Product added!");
-    }catch(err){ console.error(err); alert("Failed to add product"); }
+function editProductPrompt(id){
+  const p = products.find(x => x.id === id) || {};
+  const name = prompt("Name:", p.name || "");
+  const price = parseFloat(prompt("Price:", p.price ?? 0));
+  const imageUrl = prompt("Image URL:", p.imageUrl || p.image || "");
+  const category = prompt("Category:", p.category || "");
+  const rating = parseInt(prompt("Rating (0-5):", p.rating || 0), 10);
+  if(name && !isNaN(price) && imageUrl && category && !isNaN(rating)){
+    editProduct(id, { name, price, imageUrl, category, rating });
   }
+}
 
-  async function editProduct(id, updatedData){
-    try{
-      await db.collection("products").doc(id).update(updatedData);
-      const idx=products.findIndex(p=>p.id===id);
-      products[idx]={...products[idx],...updatedData};
-      renderProducts('all', adminMode);
-    }catch(err){ console.error(err); alert("Failed to edit product"); }
-  }
-
-  async function deleteProduct(id){
-    if(!confirm("Delete this product?")) return;
-    try{
-      await db.collection("products").doc(id).delete();
-      products=products.filter(p=>p.id!==id);
-      renderProducts('all', adminMode);
-    }catch(err){ console.error(err); alert("Failed to delete"); }
-  }
-
-  function editProductPrompt(id){
-    const p=products.find(x=>x.id===id);
-    const name=prompt("Name:",p.name);
-    const price=parseFloat(prompt("Price:",p.price));
-    const imageUrl=prompt("Image URL:",p.imageUrl||p.image);
-    const category=prompt("Category:",p.category);
-    const rating=parseInt(prompt("Rating (0-5):",p.rating||0));
-    if(name && !isNaN(price) && imageUrl && category && !isNaN(rating)){
-      editProduct(id,{name,price,imageUrl,category,rating});
-    }
-  }
-
-  // ------------------------------
-// Product Reviews
-// ------------------------------
+/* ==============================
+   Product Reviews (subcollection)
+============================== */
 async function renderProductReviews(productId, admin=false){
   try{
     const container = document.getElementById(`reviews-${productId}`);
-    if(!container) return;
+    if(!container || !db) return;
     container.innerHTML = "";
 
-    const snapshot = await db.collection("products").doc(productId)
-                             .collection("reviews").orderBy("createdAt","desc").get();
-    const reviews = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+    const snapshot = await db.collection("products").doc(productId).collection("reviews").orderBy("createdAt","desc").get();
+    const reviews = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    if(reviews.length > 0){
-      // Calculate average rating
-      const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-
-      // Display average rating in gold
+    if(reviews.length){
+      const avg = reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length;
       const avgDiv = document.createElement("div");
       avgDiv.innerHTML = `<strong>${t('average')}:</strong> <span style="color:gold;">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5 - Math.round(avg))}</span>`;
       container.appendChild(avgDiv);
 
-      // Render each review
-      reviews.forEach(r => {
+      reviews.forEach(r=>{
         const div = document.createElement("div");
         div.className = "reviewItem";
-        div.innerHTML = `<strong>${r.name}</strong> <span style="color:gold;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
-                         <p>${r.comment || ""}</p>`;
+        div.innerHTML = `
+          <strong>${r.name || "Anonymous"}</strong>
+          <span style="color:gold;">${'★'.repeat(r.rating||0)}${'☆'.repeat(5 - (r.rating||0))}</span>
+          <p>${r.comment || ""}</p>
+        `;
         if(admin){
-          const editBtn = document.createElement("button"); 
+          const editBtn = document.createElement("button");
           editBtn.textContent = "Edit";
           editBtn.onclick = () => editReviewPrompt(productId, r.id, r);
-          
-          const delBtn = document.createElement("button"); 
+          const delBtn = document.createElement("button");
           delBtn.textContent = "Delete";
           delBtn.onclick = () => deleteReview(productId, r.id);
-
           div.appendChild(editBtn);
           div.appendChild(delBtn);
         }
         container.appendChild(div);
       });
     }
-    // If no reviews, container remains empty (no "No reviews yet")
-  } catch(err){
+  }catch(err){
     console.error(err);
   }
 }
 
-  // ------------------------------
-  // Site-wide Reviews (localStorage)
-  // ------------------------------
-  let siteReviews=getJSON("siteReviews",[]);
-  function updateReviewPlaceholders(){
-    const f=document.getElementById("siteReviewForm");
-    if(!f) return;
-    const name=f.querySelector('input[name="name"]');
-    const comment=f.querySelector('textarea[name="comment"]');
-    if(name) name.placeholder=t('name');
-    if(comment) comment.placeholder=t('comment');
+// Optional stubs to avoid reference errors when admin clicks
+function editReviewPrompt(productId, reviewId, data){ alert("Edit review not implemented in this file."); }
+function deleteReview(productId, reviewId){ alert("Delete review not implemented in this file."); }
+
+/* ==============================
+   Site-wide Reviews (localStorage)
+============================== */
+let siteReviews = getJSON("siteReviews", []);
+
+function updateReviewPlaceholders(){
+  const f = document.getElementById("siteReviewForm");
+  if(!f) return;
+  const name = f.querySelector('input[name="name"]');
+  const comment = f.querySelector('textarea[name="comment"]');
+  if(name) name.placeholder = t('name');
+  if(comment) comment.placeholder = t('comment');
+}
+
+function renderSiteReviews(){
+  const list = document.getElementById("siteReviewsList");
+  const avgStars = document.getElementById("siteAvgStars");
+  const avgText = document.getElementById("siteAvgText");
+  if(!list) return;
+
+  list.innerHTML = "";
+  if(!siteReviews.length){
+    list.innerHTML = `<p>${t('noReviews')}</p>`;
+    if(avgStars) avgStars.textContent = "";
+    if(avgText)  avgText.textContent = "";
+    return;
   }
 
-  function renderSiteReviews(){
-    const list=document.getElementById("siteReviewsList");
-    const avgStars=document.getElementById("siteAvgStars");
-    const avgText=document.getElementById("siteAvgText");
-    if(!list) return;
-    list.innerHTML="";
-    if(siteReviews.length===0){ list.innerHTML=`<p>${t('noReviews')}</p>`; if(avgStars) avgStars.textContent=""; if(avgText) avgText.textContent=""; return; }
-    const avg=siteReviews.reduce((s,r)=>s+parseInt(r.rating),0)/siteReviews.length;
-    if(avgStars) avgStars.textContent='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));
-    if(avgText) avgText.textContent=`${t('average')}: ${avg.toFixed(1)}`;
-    siteReviews.forEach(r=>{
-      const div=document.createElement("div");
-      div.innerHTML=`<strong>${r.name}</strong> ${'★'.repeat(r.rating)}<p>${r.comment||""}</p>`;
-      list.appendChild(div);
-    });
-  }
+  const avg = siteReviews.reduce((s,r)=> s + parseInt(r.rating,10), 0) / siteReviews.length;
+  if(avgStars) avgStars.textContent = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+  if(avgText)  avgText.textContent  = `${t('average')}: ${avg.toFixed(1)}`;
 
+  siteReviews.forEach(r=>{
+    const div = document.createElement("div");
+    div.innerHTML = `<strong>${r.name}</strong> ${'★'.repeat(r.rating)}<p>${r.comment || ""}</p>`;
+    list.appendChild(div);
+  });
+}
 
-
-
-
-// ==============================
-// CART & CURRENCY FUNCTIONS
-// ==============================
+/* ==============================
+   Cart & Currency
+============================== */
 const rates = { USD: 1, THB: 36, PHP: 55 };
-let currentCurrency = localStorage.getItem("currency") || "PHP";
 let firstScrollDone = false;
 
-function getCart() {
-  return JSON.parse(localStorage.getItem("cartItems") || "[]");
-}
+function getCart(){ return JSON.parse(localStorage.getItem("cartItems") || "[]"); }
+function setCart(cart){ localStorage.setItem("cartItems", JSON.stringify(cart)); }
 
-function setCart(cart) {
-  localStorage.setItem("cartItems", JSON.stringify(cart));
-}
-
-// ------------------------------
-// ADD TO CART
-// ------------------------------
-function addToCart(id, name, price) {
+// Add to Cart
+function addToCart(id, name, price){
   const cart = getCart();
   const item = cart.find(i => i.id === id);
-
-  if (item) item.quantity++;
+  if(item) item.quantity++;
   else cart.push({ id, name, price, quantity: 1 });
-
   setCart(cart);
   updateCart();
   alert(`${name} added to cart!`);
 
   const checkoutForm = document.getElementById("checkoutForm");
-  if (checkoutForm) {
+  if(checkoutForm){
     checkoutForm.classList.remove("hidden");
-    if (!firstScrollDone) {
+    if(!firstScrollDone){
       checkoutForm.scrollIntoView({ behavior: "smooth" });
       firstScrollDone = true;
     }
   }
 }
 
-// ------------------------------
-// REMOVE FROM CART
-// ------------------------------
-function removeFromCart(id) {
-  setCart(getCart().filter(item => item.id !== id));
+// Remove from Cart
+function removeFromCart(id){
+  setCart(getCart().filter(i => i.id !== id));
   updateCart();
 }
 
-// ------------------------------
-// UPDATE CART TABLE & TOTALS
-// ------------------------------
-function updateCart() {
+// Update Cart Table & Totals
+function updateCart(){
   const tbody = document.querySelector("#cartTable tbody");
-  if (tbody) {
+  if(tbody){
     tbody.innerHTML = "";
     const cart = getCart();
 
-    cart.forEach(item => {
+    cart.forEach(item=>{
       const itemTotal = item.price * item.quantity;
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -518,7 +496,7 @@ function updateCart() {
     });
 
     const countEl = document.getElementById("cartCount");
-    if (countEl) countEl.textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
+    if(countEl) countEl.textContent = cart.reduce((s,i)=>s+i.quantity,0);
 
     bindQuantityInputs();
     bindQtyButtons();
@@ -527,95 +505,96 @@ function updateCart() {
   updatePrices();
 
   const checkoutForm = document.getElementById("checkoutForm");
-  if (checkoutForm && getCart().length === 0) {
+  if(checkoutForm && !getCart().length){
     checkoutForm.classList.add("hidden");
     firstScrollDone = false;
   }
 }
 
-// ------------------------------
-// QUANTITY INPUTS
-// ------------------------------
-function bindQuantityInputs() {
-  document.querySelectorAll(".cart-qty").forEach(input => {
+// Quantity input binding
+function bindQuantityInputs(){
+  document.querySelectorAll(".cart-qty").forEach(input=>{
     input.oninput = () => {
       const id = input.dataset.id;
-      let qty = parseInt(input.value);
-      if (isNaN(qty) || qty < 1) qty = 1;
+      let qty = parseInt(input.value,10);
+      if(isNaN(qty) || qty < 1) qty = 1;
       input.value = qty;
 
       const cart = getCart();
       const item = cart.find(i => i.id === id);
-      if (item) item.quantity = qty;
+      if(item) item.quantity = qty;
       setCart(cart);
       updateCart();
     };
   });
 }
 
-// ------------------------------
-// INCREMENT/DECREMENT BUTTONS
-// ------------------------------
-function bindQtyButtons() {
-  document.querySelectorAll(".qty-btn").forEach(btn => {
+// +/- buttons
+function bindQtyButtons(){
+  document.querySelectorAll(".qty-btn").forEach(btn=>{
     btn.onclick = () => {
       const id = btn.dataset.id;
       const action = btn.dataset.action;
       const cart = getCart();
       const item = cart.find(i => i.id === id);
-      if (!item) return;
-
-      if (action === "increase") item.quantity++;
-      if (action === "decrease" && item.quantity > 1) item.quantity--;
-
+      if(!item) return;
+      if(action === "increase") item.quantity++;
+      if(action === "decrease" && item.quantity > 1) item.quantity--;
       setCart(cart);
       updateCart();
     };
   });
 }
 
-// ------------------------------
-// UPDATE PRICES
-// ------------------------------
-function updatePrices() {
-  document.querySelectorAll("[data-usd]").forEach(el => {
-    const usd = parseFloat(el.dataset.usd);
+// Prices & display currency
+function updatePrices(){
+  document.querySelectorAll("[data-usd]").forEach(el=>{
+    const usd = parseFloat(el.dataset.usd || "0");
     const cur = rates[currentCurrency] ? currentCurrency : "USD";
-    el.textContent = (usd * rates[cur]).toLocaleString("en", { style: "currency", currency: cur });
+    el.textContent = (usd * rates[cur]).toLocaleString("en", { style:"currency", currency: cur });
   });
 
   const totalEl = document.getElementById("cartTotal");
-  if (totalEl) {
+  if(totalEl){
     const cur = rates[currentCurrency] ? currentCurrency : "USD";
-    const total = getCart().reduce((sum, i) => sum + i.price * i.quantity, 0) * rates[cur];
-    totalEl.textContent = `Total: ${total.toLocaleString("en", { style: "currency", currency: cur })}`;
+    const total = getCart().reduce((s,i)=> s + i.price*i.quantity, 0) * rates[cur];
+    totalEl.textContent = `${t('total')}: ${total.toLocaleString("en",{style:"currency",currency:cur})}`;
   }
 }
 
-// ------------------------------
-// CHANGE CURRENCY
-// ------------------------------
-function setCurrency(cur) {
-  if (!rates[cur]) return;
+function setCurrency(cur){
+  if(!rates[cur]) return;
   currentCurrency = cur;
   localStorage.setItem("currency", cur);
   updatePrices();
 }
 
-// ------------------------------
-// CHECKOUT FORM
-// ------------------------------
-function initCheckoutForm() {
-  const checkoutForm = document.getElementById("checkoutForm");
-  if (!checkoutForm) return;
+/* ==============================
+   Checkout Form + Messages
+============================== */
+function updateCheckoutPlaceholders(){
+  const name = document.getElementById("name");
+  const email = document.getElementById("email");
+  const phone = document.getElementById("phone");
+  const address = document.getElementById("address");
+  if(name) name.placeholder = t('name');
+  if(email) email.placeholder = t('email');
+  if(phone) phone.placeholder = t('phone');
+  if(address) address.placeholder = t('address');
+}
 
-  checkoutForm.onsubmit = e => {
+function initCheckoutForm(){
+  const form = document.getElementById("checkoutForm");
+  if(!form) return;
+
+  form.onsubmit = e => {
     e.preventDefault();
     const cart = getCart();
-    if (!cart.length) { alert("Cart is empty"); return; }
+    if(!cart.length){ alert("Cart is empty"); return; }
 
     const cartItems = cart.map(item => `${item.name} (x${item.quantity}) - ${item.price}`);
-    const templateParams = {
+
+    const params = {
       name: document.getElementById("name")?.value || "",
       email: document.getElementById("email")?.value || "",
       phone: document.getElementById("phone")?.value || "",
@@ -625,129 +604,86 @@ function initCheckoutForm() {
       total: document.getElementById("cartTotal")?.innerText || ""
     };
 
-    emailjs.send("service_kh6j2jr", "template_Orcr14j", templateParams)
-      .then(() => {
-        checkoutForm.reset();
+    emailjs.send("service_kh6j2jr", "template_Orcr14j", params)
+      .then(()=>{
+        form.reset();
         localStorage.removeItem("cartItems");
         updateCart();
-
-        const successMsg = document.getElementById("successMessage");
-        if (successMsg) {
-          successMsg.classList.remove("hidden");
-          setTimeout(() => successMsg.classList.add("hidden"), 6000);
-        }
+        const ok = document.getElementById("successMessage");
+        if(ok){ ok.classList.remove("hidden"); setTimeout(()=>ok.classList.add("hidden"), 6000); }
       })
-      .catch(err => {
+      .catch(err=>{
         console.error("EmailJS Error:", err);
-        const errorMsg = document.getElementById("errorMessage");
-        if (errorMsg) {
-          errorMsg.classList.remove("hidden");
-          setTimeout(() => errorMsg.classList.add("hidden"), 6000);
-        }
+        const bad = document.getElementById("errorMessage");
+        if(bad){ bad.classList.remove("hidden"); setTimeout(()=>bad.classList.add("hidden"), 6000); }
       });
   };
 }
 
-// ------------------------------
-// INITIALIZATION
-// ------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  // Auto-bind add-to-cart buttons
-  document.querySelectorAll("[data-add-to-cart]").forEach(btn => {
-    btn.onclick = () => {
-      const id = btn.dataset.id;
-      const name = btn.dataset.name;
-      const price = parseFloat(btn.dataset.price);
-      addToCart(id, name, price);
-    };
-  });
+// Reusable toast
+function showMessage(type){
+  const el = document.getElementById(type === "success" ? "successMessage" : "errorMessage");
+  if(!el) return;
+  el.classList.add("show");
+  setTimeout(()=>{
+    el.classList.remove("show");
+    setTimeout(()=>{ el.style.display = "none"; }, 400);
+  }, 5000);
+}
+
+/* ==============================
+   Global Init (single block)
+============================== */
+document.addEventListener("DOMContentLoaded", ()=>{
+  // Language selector
+  const langSel = document.getElementById("language");
+  if(langSel){
+    langSel.value = currentLanguage;
+    langSel.onchange = e => setLanguage(e.target.value);
+  }
 
   // Currency selector
   const curSel = document.getElementById("currency");
-  if (curSel) {
+  if(curSel){
     curSel.value = currentCurrency;
     curSel.onchange = e => setCurrency(e.target.value);
   }
 
-  // Init checkout form
-  initCheckoutForm();
+  // Category filter
+  const catSel = document.getElementById("categoryFilter");
+  if(catSel){
+    catSel.onchange = e => renderProducts(e.target.value, adminMode);
+  }
 
-  // Update cart & prices initially
+  // Add-to-cart buttons (static)
+  document.querySelectorAll("[data-add-to-cart]").forEach(btn=>{
+    btn.onclick = () => {
+      const id = btn.dataset.id;
+      const name = btn.dataset.name;
+      const price = parseFloat(btn.dataset.price || "0");
+      addToCart(id, name, price);
+    };
+  });
+
+  // Init UI
+  setLanguage(currentLanguage);      // also calls populateCategories etc.
+  updateCheckoutPlaceholders();
+  updateReviewPlaceholders();
+  renderSiteReviews();
+
+  // Cart + checkout
   updateCart();
   updatePrices();
+  initCheckoutForm();
 
-  // Hide checkout form if empty
+  // Products
+  fetchProducts();
+
+  // Hide checkout if empty
   const checkoutForm = document.getElementById("checkoutForm");
-  if (checkoutForm && !getCart().length) checkoutForm.classList.add("hidden");
+  if(checkoutForm && !getCart().length) checkoutForm.classList.add("hidden");
 });
-
-  
-
-
-  // ------------------------------
-// Reusable Message Function
-// -----------------------------
-function showMessage(type) {
-  const messageEl = document.getElementById(type === "success" ? "successMessage" : "errorMessage");
-  
-  // Show the message
-  messageEl.classList.add("show");
-  
-  // Auto hide after 5 seconds
-  setTimeout(() => {
-    messageEl.classList.remove("show");
-    // optional: wait for fade out before hiding
-    setTimeout(() => { messageEl.style.display = "none"; }, 400);
-  }, 5000);
-}
-
-
-
-    
-
-
-  
-  // ------------------------------
-  // Initialize
-  // ------------------------------
-  document.addEventListener("DOMContentLoaded",()=>{
-    const langSel=document.getElementById("language");
-    const curSel=document.getElementById("currency");
-    if(langSel) langSel.value=currentLanguage;
-    if(curSel) curSel.value=currentCurrency;
-    if(langSel) langSel.addEventListener("change",e=>setLanguage(e.target.value));
-    if(curSel) curSel.addEventListener("change",e=>{ currentCurrency=e.target.value; localStorage.setItem("currency",currentCurrency); updatePrices(); });
-
-    const checkoutForm=document.getElementById("checkoutForm");
-    if(checkoutForm){
-      checkoutForm.addEventListener("submit",async e=>{
-        e.preventDefault();
-        const cart=getCart();
-        if(cart.length===0){ alert("Cart empty"); return; }
-        const orderSummary=cart.map(i=>`${i.name} x${i.quantity}`).join("\n");
-        try{ await emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{order_summary:orderSummary}); alert("Order placed!"); }
-        catch(err){ console.warn(err); alert("Order saved locally"); }
-        localStorage.removeItem("cartItems"); updateCart(); e.target.reset();
-      });
-    }
-
-    const reviewForm=document.getElementById("siteReviewForm");
-    if(reviewForm){
-      reviewForm.addEventListener("submit",e=>{
-        e.preventDefault();
-        const f=e.target;
-        siteReviews.push({name:f.name.value,rating:parseInt(f.rating.value),comment:f.comment.value});
-        setJSON("siteReviews",siteReviews);
-        f.reset(); renderSiteReviews();
-      });
-    }
-
-    updateCart();
-    updateCartPlaceholders();
-    updateReviewPlaceholders();
-    renderSiteReviews();
-    setLanguage(currentLanguage);
-  });
 </script>
+
 </body>
 </html>
