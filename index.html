@@ -1,151 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brightgrid Wiring Co</title>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script>
-  // ✅ Initialize EmailJS (replace with your actual Public Key)
-  (function(){
-    emailjs.init("1MH2OPgPAqXqD8FiV");  
-  })();
-</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brightgrid Wiring Co</title>
 
-<link rel="stylesheet" href="style.css">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function(){ emailjs.init("1MH2OPgPAqXqD8FiV"); })();  // ✅ Your Public Key
+  </script>
 
-
-
-
-</script>
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
-  <div class="header-top">
-    <div class="logo">
-      <img src="logo.png" alt="Brightgrid Wiring Co" loading="lazy">
-      <h1>Brightgrid Wiring Co</h1>
-    </div>
-    <nav>
-      <ul>
-        <li><a href="#shop" data-key="navShop">Shop</a></li>
-        <li><a href="#cart" data-key="navCart">Cart</a></li>
-        <li><a href="#checkout" data-key="navCheckout">Checkout</a></li>
-      </ul>
-    </nav>
-    <div class="controls">
-      <label for="language">Language:</label>
-      <select id="language">
-        <option value="en">English</option>
-        <option value="th">Thai</option>
-        <option value="ph">Filipino</option>
-      </select>
-      <label for="currency">Currency:</label>
-      <select id="currency">
-        <option value="USD">USD</option>
-        <option value="THB">THB</option>
-        <option value="PHP">PHP</option>
-      </select>
-      <div class="cart-count">🛒 <span id="cartCount">0</span></div>
-    </div>
-  </div>
-</header>
-
-<main>
-  <!-- Shop -->
-  <section id="shop">
-    <div class="filters">
-      <label>Category: 
-        <select id="categoryFilter">
-          <option value="all">All</option>
+  <!-- Header -->
+  <header>
+    <div class="header-top">
+      <div class="logo">
+        <img src="logo.png" alt="Brightgrid Wiring Co" loading="lazy">
+        <h1>Brightgrid Wiring Co</h1>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#shop" data-key="navShop">Shop</a></li>
+          <li><a href="#cart" data-key="navCart">Cart</a></li>
+          <li><a href="#checkout" data-key="navCheckout">Checkout</a></li>
+        </ul>
+      </nav>
+      <div class="controls">
+        <label for="language">Language:</label>
+        <select id="language">
+          <option value="en">English</option>
+          <option value="th">Thai</option>
+          <option value="ph">Filipino</option>
         </select>
-      </label>
-    </div>
-    <div id="productGrid"></div>
 
-  </section>
-
-  <!-- Cart -->
-  <section id="cart">
-    <h2 data-key="cartHeading">Your Cart</h2>
-    <table id="cartTable">
-      <thead>
-        <tr>
-          <th data-key="product">Product</th>
-          <th data-key="qty">Qty</th>
-          <th data-key="price">Price</th>
-          <th data-key="total">Total</th>
-          <th data-key="remove">Remove</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <h3 id="cartTotal">Total: $0</h3>
-  </section>
-
-<!-- Checkout Section -->
-<section id="checkout">
-  <form id="checkoutForm" class="hidden checkout-form">
-    <h3>Checkout</h3>
-
-    <input type="text" id="name" placeholder="Your Name" required>
-    <input type="email" id="email" placeholder="Your Email" required>
-    <input type="tel" id="phone" placeholder="Phone Number" required>
-    <input type="text" id="address" placeholder="Delivery Address" required>
-
-    <label for="paymentMethod">Payment Method:</label>
-    <select id="paymentMethod">
-      <option value="Bank Transfer">Bank Transfer</option>
-      <option value="Partial Payment Transfer">Partial Payment Transfer</option>
-      <option value="Cash on Delivery">Cash on Delivery</option>
-      <option value="Card Payment (coming soon)">Card Payment (coming soon)</option>
-    </select>
-
-    <button type="submit">Place Order</button>
-  </form>
-
-  <!-- ✅ Success Message -->
-  <div id="successMessage" class="hidden success-message">
-    ✅ Your order has been placed successfully! We’ll contact you soon.
-  </div>
-
-  <!-- ❌ Error Message -->
-  <div id="errorMessage" class="hidden error-message">
-    ❌ Failed to place order. Please try again.
-  </div>
-</section>
-
-  <!-- Site Reviews -->
-  <section id="siteReviews">
-    <h3 data-key="reviewsHeading">Customer Reviews</h3>
-    <div id="siteAvgStars"></div>
-    <div id="siteAvgText"></div>
-    <div id="siteReviewsList"></div>
-    <form id="siteReviewForm">
-      <label>Rating:
-        <select name="rating" required>
-          <option value="5">★★★★★</option>
-          <option value="4">★★★★☆</option>
-          <option value="3">★★★☆☆</option>
-          <option value="2">★★☆☆☆</option>
-          <option value="1">★☆☆☆☆</option>
+        <label for="currency">Currency:</label>
+        <select id="currency">
+          <option value="USD">USD</option>
+          <option value="THB">THB</option>
+          <option value="PHP" selected>PHP</option>
         </select>
-      </label>
-      <input type="text" name="name" placeholder="Your name" required>
-      <textarea name="comment" placeholder="Write your comment (optional)"></textarea>
-      <button type="submit" data-key="submitReview">Submit Review</button>
-    </form>
-  </section>
-</main>
 
-<footer>
-  <p>&copy; 2025 Brightgrid Wiring Co</p>
-</footer>
+        <div class="cart-count">🛒 <span id="cartCount">0</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Shop -->
+    <section id="shop">
+      <div class="filters">
+        <label>Category: 
+          <select id="categoryFilter">
+            <option value="all">All</option>
+          </select>
+        </label>
+      </div>
+      <div id="productGrid"></div>
+    </section>
+
+    <!-- Cart -->
+    <section id="cart">
+      <h2 data-key="cartHeading">Your Cart</h2>
+      <table id="cartTable">
+        <thead>
+          <tr>
+            <th data-key="product">Product</th>
+            <th data-key="qty">Qty</th>
+            <th data-key="price">Price</th>
+            <th data-key="total">Total</th>
+            <th data-key="remove">Remove</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <h3 id="cartTotal">Total: ₱0</h3>
+    </section>
+
+    <!-- Checkout -->
+    <section id="checkout">
+      <form id="checkoutForm" class="hidden checkout-form">
+        <h3>Checkout</h3>
+
+        <input type="text" id="name" placeholder="Your Name" required>
+        <input type="email" id="email" placeholder="Your Email" required>
+        <input type="tel" id="phone" placeholder="Phone Number" required>
+        <input type="text" id="address" placeholder="Delivery Address" required>
+
+        <label for="paymentMethod">Payment Method:</label>
+        <select id="paymentMethod">
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Partial Payment Transfer">Partial Payment Transfer</option>
+          <option value="Cash on Delivery">Cash on Delivery</option>
+          <option value="Card Payment (coming soon)">Card Payment (coming soon)</option>
+        </select>
+
+        <button type="submit">Place Order</button>
+      </form>
+
+      <!-- Success Message -->
+      <div id="successMessage" class="hidden success-message">
+        ✅ Your order has been placed successfully! We’ll contact you soon.
+      </div>
+
+      <!-- Error Message -->
+      <div id="errorMessage" class="hidden error-message">
+        ❌ Failed to place order. Please try again.
+      </div>
+    </section>
+
+    <!-- Reviews -->
+    <section id="siteReviews">
+      <h3 data-key="reviewsHeading">Customer Reviews</h3>
+      <div id="siteAvgStars"></div>
+      <div id="siteAvgText"></div>
+      <div id="siteReviewsList"></div>
+
+      <form id="siteReviewForm">
+        <label>Rating:
+          <select name="rating" required>
+            <option value="5">★★★★★</option>
+            <option value="4">★★★★☆</option>
+            <option value="3">★★★☆☆</option>
+            <option value="2">★★☆☆☆</option>
+            <option value="1">★☆☆☆☆</option>
+          </select>
+        </label>
+        <input type="text" name="name" placeholder="Your name" required>
+        <textarea name="comment" placeholder="Write your comment (optional)"></textarea>
+        <button type="submit" data-key="submitReview">Submit Review</button>
+      </form>
+    </section>
+
+    <!-- Admin Panel (Hidden unless Admin) -->
+    <section id="adminPanel" class="hidden">
+      <h2>Admin Panel</h2>
+      <form id="productForm">
+        <input type="text" id="prodName" placeholder="Product Name" required>
+        <input type="number" id="prodPrice" placeholder="Price (USD)" required>
+        <input type="text" id="prodCategory" placeholder="Category" required>
+        <textarea id="prodDesc" placeholder="Description"></textarea>
+        <button type="submit">Add Product</button>
+      </form>
+      <div id="adminProducts"></div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Brightgrid Wiring Co</p>
+  </footer>
+
+
 
 <script>
 /* ==============================
