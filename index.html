@@ -7,6 +7,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
 
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -83,22 +85,37 @@ try { emailjs.init("YOUR_USER_ID"); } catch(e){ console.warn("EmailJS init faile
     <h3 id="cartTotal">Total: $0</h3>
   </section>
 
-  <!-- Checkout -->
-  <section id="checkout">
-    <form id="checkoutForm" class="hidden">
-      <h3 data-key="checkoutHeading">Checkout</h3>
-      <input type="text" id="name" placeholder="Your Name" required>
-      <input type="email" id="email" placeholder="Your Email" required>
-      <input type="tel" id="phone" placeholder="Phone Number" required>
-      <input type="text" id="address" placeholder="Delivery Address" required>
-      <label>Payment Method:</label>
-      <select id="paymentMethod">
-        <option value="Bank Transfer">Bank Transfer</option>
-        <option value="Partial Payment">Partial Payment</option>
-      </select>
-      <button type="submit" data-key="placeOrder">Place Order</button>
-    </form>
-  </section>
+<!-- Checkout Section -->
+<section id="checkout">
+  <form id="checkoutForm" class="hidden checkout-form">
+    <h3>Checkout</h3>
+
+    <input type="text" id="name" placeholder="Your Name" required>
+    <input type="email" id="email" placeholder="Your Email" required>
+    <input type="tel" id="phone" placeholder="Phone Number" required>
+    <input type="text" id="address" placeholder="Delivery Address" required>
+
+    <label for="paymentMethod">Payment Method:</label>
+    <select id="paymentMethod">
+      <option value="Bank Transfer">Bank Transfer</option>
+      <option value="Partial Payment Transfer">Partial Payment Transfer</option>
+      <option value="Cash on Delivery">Cash on Delivery</option>
+      <option value="Card Payment (coming soon)">Card Payment (coming soon)</option>
+    </select>
+
+    <button type="submit">Place Order</button>
+  </form>
+
+  <!-- ✅ Success Message -->
+  <div id="successMessage" class="hidden success-message">
+    ✅ Your order has been placed successfully! We’ll contact you soon.
+  </div>
+
+  <!-- ❌ Error Message -->
+  <div id="errorMessage" class="hidden error-message">
+    ❌ Failed to place order. Please try again.
+  </div>
+</section>
 
   <!-- Site Reviews -->
   <section id="siteReviews">
@@ -452,22 +469,66 @@ async function renderProductReviews(productId, admin=false){
     });
   }
 
+  
   // ------------------------------
   // Checkout Placeholders
   // ------------------------------
-  function updateCartPlaceholders(){
-    const name=document.getElementById("name");
-    const email=document.getElementById("email");
-    const phone=document.getElementById("phone");
-    const address=document.getElementById("address");
-    const pay=document.getElementById("paymentMethod");
-    if(name) name.placeholder=t('name');
-    if(email) email.placeholder=t('email');
-    if(phone) phone.placeholder=t('phone');
-    if(address) address.placeholder=t('address');
-    if(pay && pay.options.length>=2){ pay.options[0].text=t('bankTransfer'); pay.options[1].text=t('partialPayment'); }
-  }
+<!-- EmailJS Script -->
 
+  // Init EmailJS (replace with your Public Key)
+  (function() {
+    emailjs.init("YOUR_PUBLIC_KEY");
+  })();
+
+  document.getElementById("checkoutForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    // Collect cart items
+    let cartItems = [];
+    document.querySelectorAll("#cartTable tbody tr").forEach(row => {
+      const product = row.cells[0].innerText;
+      const qty = row.cells[1].innerText;
+      const price = row.cells[2].innerText;
+      cartItems.push(`${product} (x${qty}) - ${price}`);
+    });
+
+    // Collect form details
+    const templateParams = {
+      name: document.getElementById("name").value,
+      email: document.getElementById("email").value,
+      phone: document.getElementById("phone").value,
+      address: document.getElementById("address").value,
+      paymentMethod: document.getElementById("paymentMethod").value,
+      orderDetails: cartItems.join("\n"),
+      total: document.getElementById("cartTotal").innerText
+    };
+
+    // Send with EmailJS
+    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
+      .then(() => {
+        // ✅ Success
+        document.getElementById("checkoutForm").reset();
+        document.querySelector("#cartTable tbody").innerHTML = "";
+        document.getElementById("cartTotal").innerText = "Total: $0";
+        document.getElementById("checkoutForm").classList.add("hidden");
+
+        // Show success
+        const successMsg = document.getElementById("successMessage");
+        successMsg.classList.remove("hidden");
+        setTimeout(() => successMsg.classList.add("hidden"), 6000);
+
+      }, (error) => {
+        console.error("EmailJS Error:", error);
+
+        // Show error
+        const errorMsg = document.getElementById("errorMessage");
+        errorMsg.classList.remove("hidden");
+        setTimeout(() => errorMsg.classList.add("hidden"), 6000);
+      });
+  });
+
+
+  
   // ------------------------------
   // Initialize
   // ------------------------------
