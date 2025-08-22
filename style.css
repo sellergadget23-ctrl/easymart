@@ -8,9 +8,9 @@
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f9f9f9;
-  color: #333;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f8fafc;
+  color: #2c3e50;
   line-height: 1.6;
 }
 
@@ -33,10 +33,10 @@ button, select, input, textarea {
    Header
 ------------------------------ */
 header {
-  background: #222;
+  background: #1e293b;
   color: #fff;
   padding: 1em 2em;
-  border-bottom: 3px solid #0073e6;
+  border-bottom: 3px solid #3b82f6;
 }
 
 .header-top {
@@ -44,6 +44,7 @@ header {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 15px;
 }
 
 .logo {
@@ -53,7 +54,7 @@ header {
 }
 
 .logo img {
-  height: 40px;
+  height: 42px;
 }
 
 nav ul {
@@ -64,32 +65,33 @@ nav ul {
 
 nav ul li a {
   color: #fff;
-  font-weight: bold;
+  font-weight: 600;
   transition: color 0.2s ease-in;
 }
 
 nav ul li a:hover {
-  color: #0073e6;
+  color: #3b82f6;
 }
 
 .controls {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
 }
 
 .controls select {
   padding: 5px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid #cbd5e1;
 }
 
 .cart-count {
-  background: #0073e6;
+  background: #3b82f6;
   color: #fff;
   padding: 5px 10px;
   border-radius: 20px;
   font-weight: bold;
+  font-size: 0.9rem;
 }
 
 /* ------------------------------
@@ -111,8 +113,8 @@ nav ul li a:hover {
 
 .product {
   background: #fff;
-  border: 1px solid #eee;
-  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   padding: 1em;
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -120,7 +122,7 @@ nav ul li a:hover {
 
 .product:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .product img {
@@ -136,28 +138,28 @@ nav ul li a:hover {
 
 .product p {
   font-size: 0.9rem;
-  color: #555;
+  color: #64748b;
 }
 
 .product .price {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #0073e6;
+  color: #3b82f6;
   margin: 0.5em 0;
 }
 
 .product button {
-  background: #0073e6;
+  background: #3b82f6;
   color: #fff;
   border: none;
   padding: 8px 14px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s ease-in;
 }
 
 .product button:hover {
-  background: #005bb5;
+  background: #2563eb;
 }
 
 /* ------------------------------
@@ -167,8 +169,8 @@ nav ul li a:hover {
   padding: 2em;
   background: #fff;
   margin: 2em;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 #cartTable {
@@ -178,13 +180,13 @@ nav ul li a:hover {
 }
 
 #cartTable th, #cartTable td {
-  border: 1px solid #ddd;
+  border: 1px solid #e2e8f0;
   padding: 10px;
   text-align: center;
 }
 
 #cartTable th {
-  background: #0073e6;
+  background: #3b82f6;
   color: #fff;
 }
 
@@ -201,8 +203,8 @@ nav ul li a:hover {
   padding: 2em;
   background: #fff;
   margin: 2em;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .checkout-form {
@@ -215,32 +217,32 @@ nav ul li a:hover {
 .checkout-form select, 
 .checkout-form textarea {
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #cbd5e1;
   border-radius: 6px;
 }
 
 .checkout-form button {
-  background: #28a745;
+  background: #10b981;
   color: #fff;
   border: none;
-  padding: 10px;
+  padding: 12px;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s ease-in;
 }
 
 .checkout-form button:hover {
-  background: #1e7e34;
+  background: #059669;
 }
 
 .success-message {
-  color: #28a745;
+  color: #10b981;
   font-weight: bold;
   margin-top: 1em;
 }
 
 .error-message {
-  color: #dc3545;
+  color: #ef4444;
   font-weight: bold;
   margin-top: 1em;
 }
@@ -258,29 +260,29 @@ nav ul li a:hover {
 
 #siteReviewsList .review {
   background: #fff;
-  border: 1px solid #eee;
+  border: 1px solid #e2e8f0;
   padding: 1em;
   margin-bottom: 1em;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 #siteReviewForm {
   margin-top: 1em;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 #siteReviewForm select, 
 #siteReviewForm input, 
 #siteReviewForm textarea {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
 }
 
 #siteReviewForm button {
-  background: #0073e6;
+  background: #3b82f6;
   color: #fff;
   padding: 10px;
   border: none;
@@ -289,7 +291,7 @@ nav ul li a:hover {
 }
 
 #siteReviewForm button:hover {
-  background: #005bb5;
+  background: #2563eb;
 }
 
 /* ------------------------------
@@ -299,25 +301,25 @@ nav ul li a:hover {
   padding: 2em;
   background: #fff;
   margin: 2em;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 #productForm {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 1em;
 }
 
 #productForm input, #productForm textarea {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
 }
 
 #productForm button {
-  background: #0073e6;
+  background: #3b82f6;
   color: #fff;
   padding: 10px;
   border: none;
@@ -326,14 +328,14 @@ nav ul li a:hover {
 }
 
 #productForm button:hover {
-  background: #005bb5;
+  background: #2563eb;
 }
 
 /* ------------------------------
    Footer
 ------------------------------ */
 footer {
-  background: #222;
+  background: #1e293b;
   color: #fff;
   text-align: center;
   padding: 1em;
@@ -351,17 +353,25 @@ footer {
    Responsive
 ------------------------------ */
 @media (max-width: 768px) {
-  nav ul {
-    flex-direction: column;
-    gap: 10px;
-  }
-
   .header-top {
     flex-direction: column;
+    align-items: flex-start;
     gap: 15px;
   }
 
+  nav ul {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .controls {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
   #productGrid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }
