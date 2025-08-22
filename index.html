@@ -529,9 +529,12 @@ async function renderProductReviews(productId, admin=false){
         setTimeout(() => errorMsg.classList.add("hidden"), 6000);
       });
 
+}); 
 
 
-
+  // ------------------------------
+// Reusable Message Function
+// -----------------------------
 function showMessage(type) {
   const messageEl = document.getElementById(type === "success" ? "successMessage" : "errorMessage");
   
