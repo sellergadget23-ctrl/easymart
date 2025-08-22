@@ -310,25 +310,7 @@ async function renderProducts(category="all", admin=false){
 
 
   
-  function removeFromCart(id){ setCart(getCart().filter(i=>i.id!==id)); updateCart(); }
-
-  // ------------------------------
-  // Prices
-  // ------------------------------
-  const rates = { USD:1, THB:36, PHP:55 }; // update as needed
-  function updatePrices(){
-    document.querySelectorAll("[data-usd]").forEach(el=>{
-      const usd=parseFloat(el.dataset.usd);
-      const cur=rates[currentCurrency]? currentCurrency:"USD";
-      el.textContent=(usd*rates[cur]).toLocaleString("en",{style:"currency",currency:cur});
-    });
-    const totalEl=document.getElementById("cartTotal");
-    if(totalEl){
-      const cur=rates[currentCurrency]? currentCurrency:"USD";
-      const total=getCart().reduce((s,i)=>s+i.price*i.quantity,0)*rates[cur];
-      totalEl.textContent=`${t('total')}: ${total.toLocaleString("en",{style:"currency",currency:cur})}`;
-    }
-  }
+ 
 
   // ------------------------------
   // Admin Product Functions
@@ -454,16 +436,10 @@ async function renderProductReviews(productId, admin=false){
 
 
 
-  // ------------------------------
-// EmailJS Initialization
-// ------------------------------
-(function() {
-  emailjs.init("1MH2OPgPAqXqD8FiV"); // Replace with your Public Key
-})();
 
-// ------------------------------
-// Cart Functions
-// ------------------------------
+// ==============================
+// CART FUNCTIONS
+// ==============================
 function getCart() {
   return JSON.parse(localStorage.getItem("cartItems") || "[]");
 }
@@ -472,7 +448,8 @@ function setCart(cart) {
   localStorage.setItem("cartItems", JSON.stringify(cart));
 }
 
-let firstScrollDone = false; // Track first scroll to checkout form
+// Track first scroll to checkout
+let firstScrollDone = false;
 
 // Add to Cart
 function addToCart(id, name, price) {
@@ -487,13 +464,12 @@ function addToCart(id, name, price) {
 
   setCart(cart);
   updateCart();
-  alert(`${name} added to cart!`);
-  document.getElementById("checkoutForm").classList.remove("hidden");
+  alert(${name} added to cart!);
 
-  // Auto-scroll to checkout form the first time
-  if (!firstScrollDone) {
-    const checkoutForm = document.getElementById("checkoutForm");
-    if (checkoutForm) {
+  const checkoutForm = document.getElementById("checkoutForm");
+  if (checkoutForm) {
+    checkoutForm.classList.remove("hidden");
+    if (!firstScrollDone) {
       checkoutForm.scrollIntoView({ behavior: "smooth" });
       firstScrollDone = true;
     }
@@ -539,16 +515,15 @@ function updateCart() {
   bindQuantityInputs();
   bindQtyButtons();
 
-  if (cart.length === 0) {
-    document.getElementById("checkoutForm").classList.add("hidden");
-    firstScrollDone = false; // Reset scroll flag if cart becomes empty
-  } else {
-    document.getElementById("checkoutForm").classList.remove("hidden");
+  const checkoutForm = document.getElementById("checkoutForm");
+  if (cart.length === 0 && checkoutForm) {
+    checkoutForm.classList.add("hidden");
+    firstScrollDone = false;
   }
 }
 
 // ------------------------------
-// Quantity Input Binding (live update)
+// Quantity Input Binding
 // ------------------------------
 function bindQuantityInputs() {
   document.querySelectorAll(".cart-qty").forEach(input => {
@@ -588,9 +563,9 @@ function bindQtyButtons() {
   });
 }
 
-// ------------------------------
-// Currency & Prices
-// ------------------------------
+// ==============================
+// PRICES & CURRENCY
+// ==============================
 const rates = { USD: 1, THB: 36, PHP: 55 };
 let currentCurrency = localStorage.getItem("currency") || "USD";
 
@@ -605,7 +580,7 @@ function updatePrices() {
   if (totalEl) {
     const cur = rates[currentCurrency] ? currentCurrency : "USD";
     const total = getCart().reduce((sum, i) => sum + i.price * i.quantity, 0) * rates[cur];
-    totalEl.textContent = `Total: ${total.toLocaleString("en", { style: "currency", currency: cur })}`;
+    totalEl.textContent = Total: ${total.toLocaleString("en", { style: "currency", currency: cur })};
   }
 }
 
@@ -616,9 +591,9 @@ function setCurrency(cur) {
   updatePrices();
 }
 
-// ------------------------------
-// Checkout Form
-// ------------------------------
+// ==============================
+// CHECKOUT FORM
+// ==============================
 document.getElementById("checkoutForm").addEventListener("submit", function(e) {
   e.preventDefault();
 
@@ -628,7 +603,7 @@ document.getElementById("checkoutForm").addEventListener("submit", function(e) {
     return;
   }
 
-  const cartItems = cart.map(item => `${item.name} (x${item.quantity}) - ${item.price}`);
+  const cartItems = cart.map(item => ${item.name} (x${item.quantity}) - ${item.price});
 
   const templateParams = {
     name: document.getElementById("name").value,
@@ -658,9 +633,9 @@ document.getElementById("checkoutForm").addEventListener("submit", function(e) {
     });
 });
 
-// ------------------------------
-// Automatic Binding for Product Buttons & Currency Selector
-// ------------------------------
+// ==============================
+// AUTO-BINDING FOR BUTTONS & CURRENCY SELECTOR
+// ==============================
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("[data-add-to-cart]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -680,8 +655,9 @@ document.addEventListener("DOMContentLoaded", () => {
   updateCart();
   updatePrices();
 
-  if (getCart().length === 0) {
-    document.getElementById("checkoutForm").classList.add("hidden");
+  const checkoutForm = document.getElementById("checkoutForm");
+  if (getCart().length === 0 && checkoutForm) {
+    checkoutForm.classList.add("hidden");
   }
 });
 
