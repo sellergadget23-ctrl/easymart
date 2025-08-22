@@ -302,35 +302,14 @@ async function renderProducts(category="all", admin=false){
 }
 
 
-  // ------------------------------
-  // Cart Functions
-  // ------------------------------
-  function getCart(){ return getJSON("cartItems",[]); }
-  function setCart(cart){ setJSON("cartItems",cart); }
 
-  function addToCart(id,name,price){
-    let cart=getCart();
-    const exist=cart.find(i=>i.id===id);
-    if(exist) exist.quantity++; else cart.push({id,name,price,quantity:1});
-    setCart(cart); updateCart(); alert(`${name} added to cart!`);
-  }
 
-  function updateCart(){
-    const tbody=document.querySelector("#cartTable tbody");
-    if(!tbody) return;
-    tbody.innerHTML="";
-    let cart=getCart();
-    cart.forEach(i=>{
-      const tr=document.createElement("tr");
-      const itemTotal=i.price*i.quantity;
-      tr.innerHTML=`<td>${i.name}</td><td>${i.quantity}</td><td data-usd="${i.price}"></td><td data-usd="${itemTotal}"></td><td><button onclick="removeFromCart('${i.id}')">X</button></td>`;
-      tbody.appendChild(tr);
-    });
-    const countEl=document.getElementById("cartCount");
-    if(countEl) countEl.textContent=cart.reduce((s,i)=>s+i.quantity,0);
-    updatePrices();
-  }
 
+
+
+
+
+  
   function removeFromCart(id){ setCart(getCart().filter(i=>i.id!==id)); updateCart(); }
 
   // ------------------------------
@@ -473,75 +452,184 @@ async function renderProductReviews(productId, admin=false){
   }
 
 
-  
-  
-// ------------------------------
-// EmailJS Init
+
+
+  // ------------------------------
+// EmailJS Initialization
 // ------------------------------
 (function() {
-  emailjs.init("1MH2OPgPAqXqD8FiV"); // replace with your Public Key
+  emailjs.init("1MH2OPgPAqXqD8FiV"); // Replace with your Public Key
 })();
 
 // ------------------------------
-// Add to Cart
+// Cart Functions
 // ------------------------------
-function addToCart(productName, price) {
-  const cartTable = document.querySelector("#cartTable tbody");
-  const rows = cartTable.querySelectorAll("tr");
+function getCart() {
+  return JSON.parse(localStorage.getItem("cartItems") || "[]");
+}
 
-  let found = false;
+function setCart(cart) {
+  localStorage.setItem("cartItems", JSON.stringify(cart));
+}
 
-  rows.forEach(row => {
-    if (row.cells[0].innerText === productName) {
-      let qtyCell = row.cells[1];
-      qtyCell.innerText = parseInt(qtyCell.innerText) + 1;
-      found = true;
-    }
-  });
+let firstScrollDone = false; // Track first scroll to checkout form
 
-  if (!found) {
-    const row = cartTable.insertRow();
-    row.insertCell(0).innerText = productName;
-    row.insertCell(1).innerText = "1";
-    row.insertCell(2).innerText = "$" + price;
+// Add to Cart
+function addToCart(id, name, price) {
+  let cart = getCart();
+  const exist = cart.find(item => item.id === id);
+
+  if (exist) {
+    exist.quantity++;
+  } else {
+    cart.push({ id, name, price, quantity: 1 });
   }
 
-  updateCartTotal();
-
-  // ✅ Show checkout form when cart has items
+  setCart(cart);
+  updateCart();
+  alert(`${name} added to cart!`);
   document.getElementById("checkoutForm").classList.remove("hidden");
+
+  // Auto-scroll to checkout form the first time
+  if (!firstScrollDone) {
+    const checkoutForm = document.getElementById("checkoutForm");
+    if (checkoutForm) {
+      checkoutForm.scrollIntoView({ behavior: "smooth" });
+      firstScrollDone = true;
+    }
+  }
 }
 
-// ------------------------------
-// Update Cart Total
-// ------------------------------
-function updateCartTotal() {
-  let total = 0;
-  document.querySelectorAll("#cartTable tbody tr").forEach(row => {
-    const qty = parseInt(row.cells[1].innerText);
-    const price = parseFloat(row.cells[2].innerText.replace("$", ""));
-    total += qty * price;
+// Remove item from cart
+function removeFromCart(id) {
+  setCart(getCart().filter(item => item.id !== id));
+  updateCart();
+}
+
+// Update Cart Table & Totals
+function updateCart() {
+  const tbody = document.querySelector("#cartTable tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  const cart = getCart();
+
+  cart.forEach(item => {
+    const tr = document.createElement("tr");
+    const itemTotal = item.price * item.quantity;
+
+    tr.innerHTML = `
+      <td>${item.name}</td>
+      <td>
+        <button class="qty-btn" data-id="${item.id}" data-action="decrease">–</button>
+        <input type="number" min="1" value="${item.quantity}" class="cart-qty" data-id="${item.id}">
+        <button class="qty-btn" data-id="${item.id}" data-action="increase">+</button>
+      </td>
+      <td data-usd="${item.price}"></td>
+      <td data-usd="${itemTotal}"></td>
+      <td><button onclick="removeFromCart('${item.id}')">X</button></td>
+    `;
+    tbody.appendChild(tr);
   });
 
-  document.getElementById("cartTotal").innerText = "Total: $" + total.toFixed(2);
+  const countEl = document.getElementById("cartCount");
+  if (countEl) countEl.textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
+
+  updatePrices();
+  bindQuantityInputs();
+  bindQtyButtons();
+
+  if (cart.length === 0) {
+    document.getElementById("checkoutForm").classList.add("hidden");
+    firstScrollDone = false; // Reset scroll flag if cart becomes empty
+  } else {
+    document.getElementById("checkoutForm").classList.remove("hidden");
+  }
 }
 
 // ------------------------------
-// Checkout Form Submit
+// Quantity Input Binding (live update)
+// ------------------------------
+function bindQuantityInputs() {
+  document.querySelectorAll(".cart-qty").forEach(input => {
+    input.addEventListener("input", () => {
+      const id = input.dataset.id;
+      let qty = parseInt(input.value);
+      if (isNaN(qty) || qty < 1) qty = 1;
+      input.value = qty;
+
+      const cart = getCart();
+      const item = cart.find(i => i.id === id);
+      if (item) item.quantity = qty;
+      setCart(cart);
+      updateCart();
+    });
+  });
+}
+
+// ------------------------------
+// Increment/Decrement Buttons
+// ------------------------------
+function bindQtyButtons() {
+  document.querySelectorAll(".qty-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      const cart = getCart();
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+
+      if (action === "increase") item.quantity++;
+      if (action === "decrease" && item.quantity > 1) item.quantity--;
+
+      setCart(cart);
+      updateCart();
+    });
+  });
+}
+
+// ------------------------------
+// Currency & Prices
+// ------------------------------
+const rates = { USD: 1, THB: 36, PHP: 55 };
+let currentCurrency = localStorage.getItem("currency") || "USD";
+
+function updatePrices() {
+  document.querySelectorAll("[data-usd]").forEach(el => {
+    const usd = parseFloat(el.dataset.usd);
+    const cur = rates[currentCurrency] ? currentCurrency : "USD";
+    el.textContent = (usd * rates[cur]).toLocaleString("en", { style: "currency", currency: cur });
+  });
+
+  const totalEl = document.getElementById("cartTotal");
+  if (totalEl) {
+    const cur = rates[currentCurrency] ? currentCurrency : "USD";
+    const total = getCart().reduce((sum, i) => sum + i.price * i.quantity, 0) * rates[cur];
+    totalEl.textContent = `Total: ${total.toLocaleString("en", { style: "currency", currency: cur })}`;
+  }
+}
+
+function setCurrency(cur) {
+  if (!rates[cur]) return;
+  currentCurrency = cur;
+  localStorage.setItem("currency", cur);
+  updatePrices();
+}
+
+// ------------------------------
+// Checkout Form
 // ------------------------------
 document.getElementById("checkoutForm").addEventListener("submit", function(e) {
   e.preventDefault();
 
-  // Collect cart items
-  let cartItems = [];
-  document.querySelectorAll("#cartTable tbody tr").forEach(row => {
-    const product = row.cells[0].innerText;
-    const qty = row.cells[1].innerText;
-    const price = row.cells[2].innerText;
-    cartItems.push(`${product} (x${qty}) - ${price}`);
-  });
+  const cart = getCart();
+  if (cart.length === 0) {
+    alert("Cart is empty");
+    return;
+  }
 
-  // Collect form details
+  const cartItems = cart.map(item => `${item.name} (x${item.quantity}) - ${item.price}`);
+
   const templateParams = {
     name: document.getElementById("name").value,
     email: document.getElementById("email").value,
@@ -552,28 +640,49 @@ document.getElementById("checkoutForm").addEventListener("submit", function(e) {
     total: document.getElementById("cartTotal").innerText
   };
 
-  // Send with EmailJS
   emailjs.send("service_kh6j2jr", "template_Orcr14j", templateParams)
     .then(() => {
-      // ✅ Success
       document.getElementById("checkoutForm").reset();
-      document.querySelector("#cartTable tbody").innerHTML = "";
-      document.getElementById("cartTotal").innerText = "Total: $0";
-      document.getElementById("checkoutForm").classList.add("hidden"); // hide after success
+      localStorage.removeItem("cartItems");
+      updateCart();
 
-      // Show success
       const successMsg = document.getElementById("successMessage");
       successMsg.classList.remove("hidden");
       setTimeout(() => successMsg.classList.add("hidden"), 6000);
-
-    }, (error) => {
+    })
+    .catch(error => {
       console.error("EmailJS Error:", error);
-
-      // Show error
       const errorMsg = document.getElementById("errorMessage");
       errorMsg.classList.remove("hidden");
       setTimeout(() => errorMsg.classList.add("hidden"), 6000);
     });
+});
+
+// ------------------------------
+// Automatic Binding for Product Buttons & Currency Selector
+// ------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[data-add-to-cart]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const name = btn.dataset.name;
+      const price = parseFloat(btn.dataset.price);
+      addToCart(id, name, price);
+    });
+  });
+
+  const curSel = document.getElementById("currency");
+  if (curSel) {
+    curSel.value = currentCurrency;
+    curSel.addEventListener("change", e => setCurrency(e.target.value));
+  }
+
+  updateCart();
+  updatePrices();
+
+  if (getCart().length === 0) {
+    document.getElementById("checkoutForm").classList.add("hidden");
+  }
 });
 
   
