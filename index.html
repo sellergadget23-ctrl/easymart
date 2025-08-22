@@ -244,7 +244,8 @@ let adminMode = false;
 if (auth) {
   auth.onAuthStateChanged(user => {
     adminMode = user?.uid === "U1DBTrFLE4UzMeFfIIvtzz3Sokp1" || false;
-    fetchProducts(); // refresh after auth
+    // ✅ Products will refresh automatically via onSnapshot
+    // so no need to call fetchProducts() multiple times.
   });
 }
 
@@ -252,17 +253,25 @@ if (auth) {
    Products (Firestore)
 ============================== */
 let products = [];
+let unsubscribeProducts = null; // ✅ prevent multiple onSnapshot listeners
 
 function fetchProducts(){
-  if(!db){ console.warn("No Firestore instance. Skipping fetchProducts."); return; }
-  try{
-    db.collection("products").onSnapshot(snapshot=>{
+  if(!db){ 
+    console.warn("No Firestore instance. Skipping fetchProducts."); 
+    return; 
+  }
+
+  // ✅ Detach previous snapshot listener to avoid duplicates
+  if (unsubscribeProducts) unsubscribeProducts();
+
+  try {
+    unsubscribeProducts = db.collection("products").onSnapshot(snapshot => {
       products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       populateCategories();
       const selected = document.getElementById("categoryFilter")?.value || "all";
       renderProducts(selected, adminMode);
     });
-  }catch(err){
+  } catch(err) {
     console.error("Failed to fetch products:", err);
   }
 }
@@ -284,32 +293,37 @@ function getStars(rating){
 async function renderProducts(category="all", admin=false){
   const grid = document.getElementById("productGrid");
   if(!grid) return;
+
+  // ✅ Clear grid before re-render
   grid.innerHTML = "";
+
   const filtered = category === "all" ? products : products.filter(p => p.category === category);
 
   for(const p of filtered){
     const card = document.createElement("div");
     card.className = "product";
 
-    // Compute average rating from subcollection (optional)
+    // Compute average rating
     let avgRating = p.rating || 0;
-    try{
+    try {
       if(db){
         const snapshot = await db.collection("products").doc(p.id).collection("reviews").get();
         if(!snapshot.empty){
           const reviews = snapshot.docs.map(d => d.data());
           avgRating = reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length;
-          avgRating = Math.min(5, avgRating + Math.random()*0.3); // tiny random bias as in your code
+          avgRating = Math.min(5, avgRating); // removed random bias to avoid inconsistency
         }
       }
-    }catch(e){ console.error(e); }
+    } catch(e){ console.error(e); }
 
     const stars = getStars(avgRating);
 
     card.innerHTML = `
       <img src="${p.imageUrl || p.image || ""}" alt="${p.name || ""}" loading="lazy">
       <h3>${p.name || ""}</h3>
-      <p class="price" data-usd="${p.price || 0}">${Number(p.price || 0).toLocaleString("en",{style:"currency",currency:"USD"})}</p>
+      <p class="price" data-usd="${p.price || 0}">
+        ${Number(p.price || 0).toLocaleString("en",{style:"currency",currency:"USD"})}
+      </p>
       <p class="rating" style="color:gold;">${stars}</p>
       <button onclick="addToCart('${p.id}','${(p.name||"").replace(/'/g,"\\'")}',${p.price || 0})">${t('placeOrder')}</button>
       ${admin ? `
@@ -318,15 +332,18 @@ async function renderProducts(category="all", admin=false){
       ` : ""}
       <div id="reviews-${p.id}" class="productReviews"></div>
     `;
+
     grid.appendChild(card);
 
-    // Render product reviews below each card
+    // ✅ Render product reviews safely (make sure it clears old content inside)
     renderProductReviews(p.id, admin);
   }
 
   updatePrices();
 }
 
+
+  
 /* ==============================
    Admin Product Functions
 ============================== */
