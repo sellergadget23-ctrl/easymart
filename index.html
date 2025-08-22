@@ -464,7 +464,7 @@ function addToCart(id, name, price) {
 
   setCart(cart);
   updateCart();
-  alert(${name} added to cart!);
+  alert(`${name} added to cart!`);
 
   const checkoutForm = document.getElementById("checkoutForm");
   if (checkoutForm) {
@@ -563,11 +563,12 @@ function bindQtyButtons() {
   });
 }
 
-// ==============================
+  
+
 // PRICES & CURRENCY
 // ==============================
 const rates = { USD: 1, THB: 36, PHP: 55 };
-let currentCurrency = localStorage.getItem("currency") || "USD";
+let currentCurrency = localStorage.getItem("currency") || "PHP";
 
 function updatePrices() {
   document.querySelectorAll("[data-usd]").forEach(el => {
@@ -580,7 +581,7 @@ function updatePrices() {
   if (totalEl) {
     const cur = rates[currentCurrency] ? currentCurrency : "USD";
     const total = getCart().reduce((sum, i) => sum + i.price * i.quantity, 0) * rates[cur];
-    totalEl.textContent = Total: ${total.toLocaleString("en", { style: "currency", currency: cur })};
+    totalEl.textContent = `Total: ${total.toLocaleString("en", { style: "currency", currency: cur })}`;
   }
 }
 
