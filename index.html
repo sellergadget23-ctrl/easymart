@@ -9,11 +9,14 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
+  // ✅ Initialize EmailJS (replace with your actual Public Key)
+  (function(){
+    emailjs.init("1MH2OPgPAqXqD8FiV");  
+  })();
+</script>
 
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-try { emailjs.init("YOUR_USER_ID"); } catch(e){ console.warn("EmailJS init failed:", e); }
+
 
 
 
@@ -525,7 +528,27 @@ async function renderProductReviews(productId, admin=false){
         errorMsg.classList.remove("hidden");
         setTimeout(() => errorMsg.classList.add("hidden"), 6000);
       });
+
+
+
+
+function showMessage(type) {
+  const messageEl = document.getElementById(type === "success" ? "successMessage" : "errorMessage");
   
+  // Show the message
+  messageEl.classList.add("show");
+  
+  // Auto hide after 5 seconds
+  setTimeout(() => {
+    messageEl.classList.remove("show");
+    // optional: wait for fade out before hiding
+    setTimeout(() => { messageEl.style.display = "none"; }, 400);
+  }, 5000);
+}
+
+
+
+    
 
 
   
