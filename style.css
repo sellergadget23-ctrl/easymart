@@ -1,220 +1,303 @@
-/* ==========================
-   Reset & Global
-========================== */
+/* ==============================
+   General Reset
+============================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 body {
-  background: #f5f5f7;
-  color: #222;
-  font-size: 15px;
+  background: #f5f5f5;
+  color: #333;
   line-height: 1.5;
 }
 
-/* ==========================
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ==============================
    Header
-========================== */
+============================== */
 header {
+  background-color: #ff5722; /* Shopee-style orange */
+  color: #fff;
+  padding: 10px 20px;
   position: sticky;
   top: 0;
-  z-index: 100;
-  background: #ff5722; /* Shopee orange */
-  color: #fff;
-  padding: 0.8rem 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+header .header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
 }
+
 header .logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 10px;
 }
-header .logo img {
-  width: 36px;
-  height: 36px;
-  object-fit: cover;
-  border-radius: 6px;
+
+header .logo h1 {
+  font-size: 1.5rem;
 }
+
 header nav ul {
-  display: flex;
-  gap: 1rem;
   list-style: none;
+  display: flex;
+  gap: 15px;
 }
+
 header nav ul li a {
-  color: #fff;
   font-weight: 600;
-  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background 0.2s;
 }
+
+header nav ul li a:hover {
+  background: rgba(255,255,255,0.2);
+}
+
 header .controls {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
+  gap: 15px;
+  margin-top: 10px;
 }
+
 header select {
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
+  padding: 5px 8px;
+  border-radius: 5px;
   border: none;
 }
 
-/* ==========================
+header .cart-count {
+  font-size: 1.1rem;
+}
+
+/* ==============================
+   Main & Sections
+============================== */
+main {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 15px;
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+/* ==============================
    Product Grid
-========================== */
+============================== */
 #productGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
 }
 
 .product {
-  position: relative;
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
-  padding: 0.4rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  overflow: hidden;
-  cursor: pointer;
-}
-.product:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-.product img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
+  justify-content: space-between;
 }
 
-/* ==========================
-   Shopee-style overlay Add-to-Cart
-========================== */
-.product::after {
-  content: "🛒 Add to Cart";
-  position: absolute;
-  bottom: -35px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #ff5722;
-  color: #fff;
-  padding: 0.3rem 0.6rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  transition: bottom 0.2s ease;
-  pointer-events: none;
+.product:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-.product:hover::after {
-  bottom: 8px;
+
+.product img {
+  width: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  margin-bottom: 8px;
 }
 
 .product h3 {
-  font-size: 0.9rem;
-  margin: 0.3rem 0 0.2rem;
-  line-height: 1.2;
-  white-space: nowrap;
+  font-size: 1rem;
+  margin-bottom: 5px;
+  height: 40px;
   overflow: hidden;
-  text-overflow: ellipsis;
-}
-.product p.price {
-  font-weight: 700;
-  color: #673ab7; /* Lazada purple */
-  font-size: 0.9rem;
-  margin: 0.2rem 0;
-}
-.product p.rating {
-  font-size: 0.8rem;
-  color: #ffb400;
-  margin-bottom: 0.3rem;
-}
-.product button {
-  display: none; /* hide default button, overlay used */
 }
 
-/* ==========================
-   Filters & Checkout
-========================== */
-.filters label {
+.product .price {
+  font-weight: 600;
+  color: #ff5722;
+  margin-bottom: 5px;
+}
+
+.product .rating {
   font-size: 0.9rem;
+  margin-bottom: 8px;
 }
-#cartTable, #cartTable th, #cartTable td {
-  border: 1px solid #eee;
-  border-collapse: collapse;
-  padding: 0.4rem;
-  text-align: center;
-  font-size: 0.85rem;
+
+.product button {
+  background: #ff5722;
+  color: #fff;
+  padding: 8px 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
 }
-#cartTotal {
-  margin-top: 0.5rem;
+
+.product button:hover {
+  background: #e64a19;
+}
+
+/* ==============================
+   Filters
+============================== */
+.filters {
+  margin-bottom: 15px;
+}
+
+.filters label {
   font-weight: 600;
 }
 
-/* ==========================
-   Forms
-========================== */
-input, select, textarea, button {
-  font-family: inherit;
-  font-size: 0.9rem;
-}
-input, textarea, select {
-  padding: 0.35rem 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin: 0.25rem 0;
+/* ==============================
+   Cart
+============================== */
+#cart table {
   width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
 }
-button {
-  cursor: pointer;
+
+#cart th, #cart td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
+
+#cart th {
+  background: #ff5722;
+  color: #fff;
+}
+
+#cart tbody tr:hover {
+  background: #fff3e0;
+}
+
+#cartTotal {
+  text-align: right;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+/* ==============================
+   Checkout Form
+============================== */
+.checkout-form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.checkout-form input,
+.checkout-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
 .checkout-form button {
   background: #ff5722;
   color: #fff;
+  padding: 12px;
+  width: 100%;
+  font-weight: 600;
   border: none;
-  padding: 0.4rem 0.7rem;
-  border-radius: 8px;
-  margin-top: 0.3rem;
+  border-radius: 5px;
+  cursor: pointer;
 }
+
 .checkout-form button:hover {
   background: #e64a19;
 }
 
-/* ==========================
-   Footer
-========================== */
-footer {
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.8rem;
-  color: #555;
+/* ==============================
+   Reviews
+============================== */
+#siteReviews {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
 }
 
-/* ==========================
+#siteReviews form input,
+#siteReviews form textarea,
+#siteReviews form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#siteReviews form button {
+  background: #2196f3; /* Lazada blue accent */
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#siteReviews form button:hover {
+  background: #1976d2;
+}
+
+/* ==============================
+   Footer
+============================== */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #ff5722;
+  color: #fff;
+}
+
+/* ==============================
    Responsive
-========================== */
-@media (max-width: 600px) {
+============================== */
+@media (max-width: 768px) {
   #productGrid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
+
+  header .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
   header nav ul {
     flex-direction: column;
-    position: absolute;
-    top: 55px;
-    right: 0;
-    background: #ff5722;
-    display: none;
-    width: 140px;
-    padding: 0.5rem;
-    border-radius: 6px;
-  }
-  .nav-toggle:checked + .nav-toggle-label + nav ul {
-    display: flex;
+    gap: 10px;
   }
 }
